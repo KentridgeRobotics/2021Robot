@@ -57,6 +57,18 @@ public class ShooterHoodSubsystem extends SubsystemBase {
     public double getHoodPosition() {
         return (double)shooterHood.getSensorCollection().getQuadraturePosition();
     }
+    
+    public double getHoodAngle()  {
+        LimelightSubsystem limelight = LimelightSubsystem.getInstance();
+        double d = limelight.distance()*0.0254;
+        //double d needs to be the information coming from the limelight, the length reported from the limelight
+        double h = 0.0254*(Constants.targetHeight - Constants.cameraHeight);
+        //conversion from inches to meters    
+        double theta = Math.atan(2*h/d);
+        //calculations for theta of equatio
+    
+        return Math.toDegrees(theta); 
+    }
 
     @Override
     public void periodic() {
