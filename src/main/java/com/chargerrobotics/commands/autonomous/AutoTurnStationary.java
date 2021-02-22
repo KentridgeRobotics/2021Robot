@@ -30,38 +30,47 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.chargerrobotics.utils.SmartDashboardHelper;
+
 
 public class AutoTurnStationary extends CommandBase {
   private static final Logger logger = LoggerFactory.getLogger(AutoTurnStationary.class);
 
   private double currentHeading;
   private double initialHeading;
+  private double targetAngle = 0;     // This is the desired angle
+  private double lastRotationOutput; // use this as variable to store value that is being passed through the drive 
 
   private final DriveSubsystem drive; // look at gyroscopeseial thing for why its not working
   private final GyroscopeSerial gyro; //Will use gyro to check location and angle
+  private final SmartDashboardHelper smartDashboardHelper; 
 
   private DifferentialDriveOdometry odometry; // odometry is like a graph on the floor and directions on how to get back to where it started
   private PIDController rotationPid;  //needed to figure speed for turning 
-  // pid control for rotating 
-  private double linRotP = SmartDashboard.getNumber("linRotP", 0.0);
-  private double linRotI = SmartDashboard.getNumber("linRotI", 0.0);
-  private double linRotD = SmartDashboard.getNumber("linRotD", 0.0);
-  private double linRotTolerance = SmartDashboard.getNumber("linRotTolerance", 0.0);
 
-
-  public AutoTurnStationary(DriveSubsystem drive, GyroscopeSerial gyro) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public AutoTurnStationary(DriveSubsystem drive, GyroscopeSerial gyro, SmartDashboardHelper smartDashboardHelper) {
     this.drive = drive;
     this.gyro = gyro;
+    this.smartDashboardHelper = smartDashboardHelper;
     
-    SmartDashboard.putNumber("StationaryRotation", 0.0); //creates a string
-    SmartDashboard.putNumber("linRotP", linRotP);
-    SmartDashboard.putNumber("linRotI", linRotI); 
-    SmartDashboard.putNumber("linRotD",linRotD);
-    SmartDashboard.putNumber("linRotTolerance", linRotTolerance);
     this.rotationPid = new PIDController(0.0, 0.0, 0.0);
     this.rotationPid.enableContinuousInput(0.0, 360.0);
+  }
 
+  public void SetTargetAngle(double angle)
+  {
+    this.targetAngle = angle;
+  }
+
+  public PIDController GetRotationPID()
+  {
+    return this.rotationPid;
+  }
+
+  public double GetLastRotationValue()
+  {
+    return this.lastRotationOutput;
   }
 
   // Called when the command is initially scheduled.
@@ -74,11 +83,11 @@ public class AutoTurnStationary extends CommandBase {
     drive.setAutonomousRunning(true);
     drive.setThrottle(0, 0); // Clear out any current speed/throttle on the drive....
     
-    rotationPid.setP(SmartDashboard.getNumber("linRotP", 0.0));
-    rotationPid.setI(SmartDashboard.getNumber("linRotI", 0.0));
-    rotationPid.setD(SmartDashboard.getNumber("linRotD", 0.0));
-    rotationPid.setTolerance(SmartDashboard.getNumber("linRotTol", 1.0));
-    rotationPid.setSetpoint(SmartDashboard.getNumber("StationaryRotation", 0.0));
+    rotationPid.setP(smartDashboardHelper.getNumber("linRotP", 0.05));
+    rotationPid.setI(smartDashboardHelper.getNumber("linRotI", 0.05));
+    rotationPid.setD(smartDashboardHelper.getNumber("linRotD", 0.05));
+    rotationPid.setTolerance(smartDashboardHelper.getNumber("linRotTol", 0.05));
+    rotationPid.setSetpoint(smartDashboardHelper.getNumber("StationaryRotation", targetAngle));
     odometry = new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
 
    }
@@ -91,6 +100,7 @@ public class AutoTurnStationary extends CommandBase {
     Pose2d pose = odometry.update(getGyroHeading(), 0, 0); // getDistanceLeft = 0, getDistanceRight = 0
     Rotation2d rotation = pose.getRotation();
     double rotationOutput = rotationPid.calculate(rotation.getDegrees());
+    this.lastRotationOutput = rotationOutput;
     drive.arcadeDrive(0, rotationOutput);
   }
 
