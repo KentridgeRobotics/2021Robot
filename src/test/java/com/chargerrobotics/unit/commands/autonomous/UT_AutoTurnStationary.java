@@ -73,7 +73,7 @@ public class UT_AutoTurnStationary {
     // Run another iteration
     testCommand.execute();
 
-    assertEquals(testCommand.GetLastRotationValue(), -1228.9999999999998);
+    assertEquals(testCommand.GetLastRotationValue(), -8.075);
 
     // If you need to verify a mocked class ran function X times, this is how you do it
     // verify(gyroMock, times(1)).getHeading();
