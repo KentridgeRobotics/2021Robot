@@ -83,9 +83,9 @@ public class AutoTurnStationary extends CommandBase {
     drive.setAutonomousRunning(true);
     drive.setThrottle(0, 0); // Clear out any current speed/throttle on the drive....
     
-    rotationPid.setP(smartDashboardHelper.getNumber("linRotP", 0.05));
-    rotationPid.setI(smartDashboardHelper.getNumber("linRotI", 0.05));
-    rotationPid.setD(smartDashboardHelper.getNumber("linRotD", 0.05));
+    rotationPid.setP(smartDashboardHelper.getNumber("linRotP", 0.005));
+    rotationPid.setI(smartDashboardHelper.getNumber("linRotI", 0.000005));
+    rotationPid.setD(smartDashboardHelper.getNumber("linRotD", 0.000005));
     rotationPid.setTolerance(smartDashboardHelper.getNumber("linRotTol", 0.05));
     rotationPid.setSetpoint(smartDashboardHelper.getNumber("StationaryRotation", targetAngle));
     odometry = new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0.0, 0.0, new Rotation2d(0.0)));

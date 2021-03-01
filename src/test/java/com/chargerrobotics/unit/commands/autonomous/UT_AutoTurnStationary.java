@@ -64,16 +64,29 @@ public class UT_AutoTurnStationary {
 
     assertEquals(gyroMock.getHeading(), 0.0f);
     assertEquals(testCommand.GetRotationPID().getSetpoint(), 90.0, "GetRotationPID should return 90");
-    assertEquals(testCommand.GetLastRotationValue(), 229.59); // should be -1 to 1 ... ??
+    boolean checkInitial = testCommand.GetLastRotationValue() >= 0.45;
+    assertEquals(checkInitial, true, "Check Initial is false because value equals " + testCommand.GetLastRotationValue());
+    
 
     // Add a gyro mock to change the heading
     reset(gyroMock);
-    when (gyroMock.getHeading()).thenReturn(5.0f);
+    when (gyroMock.getHeading()).thenReturn(89.0f);
 
     // Run another iteration
     testCommand.execute();
 
-    assertEquals(testCommand.GetLastRotationValue(), -8.075);
+    boolean checkNearTarget = testCommand.GetLastRotationValue() < 0.01 && testCommand.GetLastRotationValue() > -0.02; // sees if will move a little more, since we are already at 89
+    assertEquals(checkNearTarget, true, "Check Near Target is false because value equals " + testCommand.GetLastRotationValue());
+
+
+    reset(gyroMock);
+    when (gyroMock.getHeading()).thenReturn(91.0f);
+
+    // Run another iteration
+    testCommand.execute();
+
+    boolean checkAfterTarget = testCommand.GetLastRotationValue() < 0; 
+    assertEquals(checkAfterTarget, true, "Check After Target is false because value equals " + testCommand.GetLastRotationValue());
 
     // If you need to verify a mocked class ran function X times, this is how you do it
     // verify(gyroMock, times(1)).getHeading();
