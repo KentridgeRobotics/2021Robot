@@ -6,9 +6,21 @@ import com.chargerrobotics.utils.XboxController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -20,9 +32,22 @@ public class DriveSubsystem extends SubsystemBase {
   private CANSparkMax rightRear;
   private CANSparkMax rightFront;
 
+  private edu.wpi.first.wpilibj.Encoder fakeLeftEncoder;
+  private edu.wpi.first.wpilibj.Encoder fakeRightEncoder;
+  private EncoderSim leftEncoderSim;
+  private EncoderSim rightEncoderSim;
+  private AnalogGyro fakeGyro;
+  private AnalogGyroSim gyroSim;
+
+  private Field2d field;
+
+  private DifferentialDrivetrainSim drivetrainSim;
+
   private DifferentialDrive differentialDrive;
   private SpeedControllerGroup leftDriveGroup;
   private SpeedControllerGroup rightDriveGroup;
+
+  private DifferentialDriveOdometry odometry;
 
   private double leftThrottle;
   private double rightThrottle;
@@ -32,8 +57,11 @@ public class DriveSubsystem extends SubsystemBase {
   private boolean slow;
 
   private boolean autonomousRunning;
+  private boolean odometryInitialized;
 
   private XboxController driveController;
+
+  private float gyroHeadingRadians;
 
   public static DriveSubsystem getInstance(XboxController driveController) {
     if (instance == null) instance = new DriveSubsystem(driveController);
@@ -68,6 +96,43 @@ public class DriveSubsystem extends SubsystemBase {
 
     differentialDrive = new DifferentialDrive(leftDriveGroup, rightDriveGroup);
     differentialDrive.setDeadband(0.0);
+
+    odometryInitialized = false;
+
+    resetOdometry();
+
+    if (RobotBase.isSimulation()) {
+      fakeLeftEncoder = new Encoder(1, 2);
+      fakeLeftEncoder.setDistancePerPulse(Constants.distancePerPulse);
+      fakeRightEncoder = new Encoder(3, 4);
+      fakeRightEncoder.setDistancePerPulse(Constants.distancePerPulse);
+      leftEncoderSim = new EncoderSim(fakeLeftEncoder);
+      rightEncoderSim = new EncoderSim(fakeRightEncoder);
+      fakeGyro = new AnalogGyro(1);
+      gyroSim = new AnalogGyroSim(fakeGyro);
+
+      drivetrainSim =
+          new DifferentialDrivetrainSim(
+              DCMotor.getNEO(2),
+              Constants.driveGearRatio,
+              Constants.momentOfInertia,
+              Constants.robotMassKG,
+              Constants.wheelRadiusMeters,
+              Constants.trackWidthMeters,
+              null); // Will not account for sensor measurement noise.
+      field = new Field2d();
+      SmartDashboard.putData("Field", field);
+    }
+  }
+
+  public void initOdometry(double x, double y) { // PROBLEMS
+    odometry =
+        new DifferentialDriveOdometry(
+            RobotBase.isReal()
+                ? new Rotation2d(gyroHeadingRadians)
+                : Rotation2d.fromDegrees(gyroSim.getAngle()),
+            new Pose2d(x, y, Rotation2d.fromDegrees(gyroHeadingRadians)));
+    odometryInitialized = true;
   }
 
   public void setAutonomousRunning(boolean autonomousRunning) {
@@ -104,8 +169,36 @@ public class DriveSubsystem extends SubsystemBase {
     return leftFront.getEncoder().getPosition();
   }
 
+  public double getLeftDistanceMeters() {
+    return leftFront.getEncoder().getPosition() * Constants.encoderPPR * Constants.distancePerPulse;
+  }
+
   public double getOdoRight() {
     return rightFront.getEncoder().getPosition();
+  }
+
+  public double getRightDistanceMeters() {
+    return rightFront.getEncoder().getPosition()
+        * Constants.encoderPPR
+        * Constants.distancePerPulse;
+  }
+
+  public void resetOdometry() {
+    leftFront.getEncoder().setPosition(0.0);
+    rightFront.getEncoder().setPosition(0.0);
+  }
+
+  public void passGyroHeadingRadians(float heading) {
+    gyroHeadingRadians = heading;
+  }
+
+  /**
+   * This can be used to pass the gyro heading to any autonomous command
+   *
+   * @return gyro heading in radians
+   */
+  public float getGyroHeadingRadians() {
+    return gyroHeadingRadians;
   }
 
   public void setSpeeds(double left, double right) {
@@ -149,6 +242,31 @@ public class DriveSubsystem extends SubsystemBase {
     if (!autonomousRunning) {
       tankDrive(leftThrottle, rightThrottle);
     }
+    if (odometryInitialized) {
+      if (RobotBase.isReal()) {
+        odometry.update(
+            new Rotation2d(gyroHeadingRadians), getLeftDistanceMeters(), getRightDistanceMeters());
+      } else {
+        odometry.update(
+            fakeGyro.getRotation2d(),
+            fakeLeftEncoder.getDistance(),
+            fakeRightEncoder.getDistance());
+        field.setRobotPose(odometry.getPoseMeters());
+      }
+    }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    drivetrainSim.setInputs(
+        leftDriveGroup.get() * RobotController.getInputVoltage(),
+        rightDriveGroup.get() * RobotController.getInputVoltage());
+    drivetrainSim.update(0.02); // Robot loops every 20 milliseconds.
+    leftEncoderSim.setDistance(drivetrainSim.getLeftPositionMeters());
+    leftEncoderSim.setRate(drivetrainSim.getLeftVelocityMetersPerSecond());
+    rightEncoderSim.setDistance(drivetrainSim.getRightPositionMeters());
+    rightEncoderSim.setRate(drivetrainSim.getRightVelocityMetersPerSecond());
+    gyroSim.setAngle(-drivetrainSim.getHeading().getRadians());
   }
 
   public void initDefaultCommand() {
