@@ -60,14 +60,37 @@ public class ShooterHoodSubsystem extends SubsystemBase {
     
     public double getHoodAngle()  {
         LimelightSubsystem limelight = LimelightSubsystem.getInstance();
-        double d = limelight.distance()*0.0254;
+        double d = limelight.distance();
         //double d needs to be the information coming from the limelight, the length reported from the limelight
-        double h = 0.0254*(Constants.targetHeight - Constants.cameraHeight);
+        double h = (Constants.targetHeight - Constants.cameraHeight);
         //conversion from inches to meters    
         double theta = Math.atan(2*h/d);
         //calculations for theta of equatio
     
         return Math.toDegrees(theta); 
+    }
+
+    public double getAngleByZone() {
+        LimelightSubsystem limelight = LimelightSubsystem.getInstance();
+        double d = limelight.distance();
+        // green zone -- 0 to 90 inches
+        if (d >= 0 && d < 90) {
+            return 0.0;
+        }
+        // yellow zone
+        if (d >= 90 && d < 150) {
+            return 0.0;
+        }
+        // blue zone
+        if (d >= 150 && d < 210) {
+            return 0.0;
+        }
+        // red zone
+        if (d >= 210 && d < 270) {
+            return 0.0;
+        }
+
+        return 0.0;
     }
 
     @Override

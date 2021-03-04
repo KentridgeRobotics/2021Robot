@@ -29,7 +29,7 @@ public class HoodAutoCommand extends CommandBase {
   @Override
   public void initialize() {
     // Angle to target
-    double angle = shooterSubsystem.getHoodAngle();
+    double angle = shooterSubsystem.getAngleByZone();
     // Ticks to Angle
     double newposition = shooterSubsystem.findHoodTargetTicks(angle);
     // Current Position
@@ -60,7 +60,7 @@ public class HoodAutoCommand extends CommandBase {
   @Override
   public boolean isFinished() {
     // Same thing in initialize
-    double angle = shooterSubsystem.getHoodAngle();
+    double angle = shooterSubsystem.getAngleByZone();
     double position = shooterSubsystem.getHoodPosition();
     double newposition = shooterSubsystem.findHoodTargetTicks(angle);
     // Checking if the Position is Correct
