@@ -29,7 +29,7 @@ import com.chargerrobotics.commands.groups.VisionDrive;
 import com.chargerrobotics.commands.groups.VisionTurn;
 import com.chargerrobotics.commands.shooter.HoodCalibrateCommand;
 import com.chargerrobotics.commands.shooter.HoodManualCommand;
-import com.chargerrobotics.commands.shooter.HoodPIDCommand;
+import com.chargerrobotics.commands.shooter.HoodAutoCommand;
 import com.chargerrobotics.commands.shooter.HoodPresetAngleCommand;
 import com.chargerrobotics.commands.shooter.HoodRetractCommand;
 import com.chargerrobotics.commands.shooter.KickerCommand;
@@ -99,7 +99,7 @@ public class RobotContainer {
   private HoodManualCommand hoodManualUpCommand;
   private HoodManualCommand hoodManualDownCommand;
   private HoodCalibrateCommand hoodCalibrateCommand;
-  private HoodPIDCommand hoodPIDCommand;
+  private HoodAutoCommand hoodAutoCommand;
   private HoodPresetAngleCommand hoodPresetAngleCommand;
   private HoodRetractCommand hoodRetractCommand;
   private KickerCommand kickerCommand;
@@ -215,7 +215,7 @@ public class RobotContainer {
       hoodManualUpCommand = new HoodManualCommand(shooterHoodSubsystem, true);
       hoodManualDownCommand = new HoodManualCommand(shooterHoodSubsystem, false);
       hoodCalibrateCommand = new HoodCalibrateCommand(shooterHoodSubsystem);
-      hoodPIDCommand = new HoodPIDCommand(shooterHoodSubsystem);
+      hoodAutoCommand = new HoodAutoCommand(shooterHoodSubsystem);
       hoodPresetAngleCommand =
           new HoodPresetAngleCommand(shooterHoodSubsystem, Constants.hoodPresetAngle);
       hoodRetractCommand = new HoodRetractCommand(shooterHoodSubsystem, Constants.hoodRetractAngle);
@@ -290,7 +290,7 @@ public class RobotContainer {
     }
     if (shooterHoodEnabled) {
       secondary.buttonMenu.whenPressed(hoodCalibrateCommand);
-      secondary.buttonView.whenPressed(hoodPIDCommand);
+      secondary.buttonView.whenPressed(hoodAutoCommand);
       // secondary.buttonPovUp.whenPressed(hoodPresetAngleCommand);
       secondary.buttonPovUp.whileHeld(hoodManualUpCommand);
       secondary.buttonPovDown.whileHeld(hoodManualDownCommand);
