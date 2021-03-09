@@ -35,7 +35,7 @@ public class GyroscopeSerial extends ArduinoListener {
   }
 
   /**
-   * Gets the robot heading in radians on the interval [-pi, pi) or {@code -1} if data is expired.
+   * Gets the robot heading in radians on the interval [-pi, pi) or {@code -9} if data is expired.
    * This method is counterclockwise-positive, but the gyro is clockwise positive
    *
    * @return Robot heading radians
@@ -47,7 +47,7 @@ public class GyroscopeSerial extends ArduinoListener {
     } else {
       headingRad = -x;
     }
-    return isExpired() ? -1 : (float) Math.toRadians(headingRad);
+    return isExpired() ? -9 : (float) Math.toRadians(headingRad);
   }
 
   /**
@@ -64,7 +64,7 @@ public class GyroscopeSerial extends ArduinoListener {
    *
    * @return Robot heading in degrees
    */
-  public float getRawX() {
+  public float getRawYaw() {
     return x;
   }
 
