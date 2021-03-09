@@ -88,14 +88,98 @@ public class UT_AutoTurnStationary {
     boolean checkAfterTarget = testCommand.GetLastRotationValue() < 0; 
     assertEquals(checkAfterTarget, true, "Check After Target is false because value equals " + testCommand.GetLastRotationValue());
 
-    // If you need to verify a mocked class ran function X times, this is how you do it
-    // verify(gyroMock, times(1)).getHeading();
+  
 
-    
-    // assert only occures when it fails, then it give this message to us to explain whats wrong
-    //assertEquals(testCommand.isFinished(), false, "Command is initialized, but not finished."); //we want it to be false, if it is true then it has failed because it shouldn't have finished yet
+    }
+  
+  
+  @Test()
+  public void Turn0Degrees() {
+  
+  reset(gyroMock);
+  reset(driveMock);
+  reset(smartDashboardMock);
+  
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
+    testCommand.SetTargetAngle(0);
+    testCommand.initialize();
+    when (gyroMock.getHeading()).thenReturn(0.0f);
+    testCommand.execute();
 
-    //assertNotEquals(joystickReading, 2.0, "Joystick reading not set!");
-    //assertEquals(joystickReading, expectedValue, joystickAcceptableError);
+    assertEquals(gyroMock.getHeading(), 0.0f);
+    assertEquals(testCommand.GetRotationPID().getSetpoint(), 0.0, "GetRotationPID should return 0");
+    assertEquals(0.0,testCommand.GetLastRotationValue(), "Check Initial is false because value equals " + testCommand.GetLastRotationValue());
   }
+  
+  @Test()
+  public void TurnNegative90Degrees() {
+  
+  reset(gyroMock);
+  reset(driveMock);
+  reset(smartDashboardMock);
+  
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
+    testCommand.SetTargetAngle(-90);
+    testCommand.initialize();
+    testCommand.execute();
+
+    assertEquals(testCommand.GetRotationPID().getSetpoint(), -90.0, "GetRotationPID should return -90");
+    boolean checkInitial = testCommand.GetLastRotationValue() <= -0.45;
+    assertEquals(checkInitial, true, "Check Initial is false because value equals " + testCommand.GetLastRotationValue());
+  }
+
+  @Test()
+  public void Turn90Degrees() {
+  
+  reset(gyroMock);
+  reset(driveMock);
+  reset(smartDashboardMock);
+  
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
+    testCommand.SetTargetAngle(90);
+    testCommand.initialize();
+    testCommand.execute();
+
+    assertEquals(testCommand.GetRotationPID().getSetpoint(), 90.0, "GetRotationPID should return 90");
+    boolean checkInitial = testCommand.GetLastRotationValue() >= 0.45;
+    assertEquals(checkInitial, true, "Check Initial is false because value equals " + testCommand.GetLastRotationValue());
+  }
+
+  @Test()
+  public void TurnFrom89Degrees() {
+  
+  reset(gyroMock);
+  reset(driveMock);
+  reset(smartDashboardMock);
+  
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
+    testCommand.SetTargetAngle(90);
+    testCommand.initialize();    
+    when (gyroMock.getHeading()).thenReturn(89.0f);
+    testCommand.execute();
+
+    boolean checkNearTarget = testCommand.GetLastRotationValue() < 0.01 && testCommand.GetLastRotationValue() > -0.02; // sees if will move a little more, since we are already at 89
+    assertEquals(checkNearTarget, true, "Check Near Target is false because value equals " + testCommand.GetLastRotationValue());
+
+  }
+  
+  @Test()
+  public void Turn91Degrees() {
+  
+  reset(gyroMock);
+  reset(driveMock);
+  reset(smartDashboardMock);
+  
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
+    testCommand.SetTargetAngle(90);
+    testCommand.initialize();    
+    when (gyroMock.getHeading()).thenReturn(91.0f);
+    testCommand.execute();
+
+    boolean checkNearTarget = testCommand.GetLastRotationValue() < 0.01 && testCommand.GetLastRotationValue() > -0.02; // sees if will move a little more, since we are already at 89
+    assertEquals(checkNearTarget, true, "Check Near Target is false because value equals " + testCommand.GetLastRotationValue());
+
+  }
+
+
 }
