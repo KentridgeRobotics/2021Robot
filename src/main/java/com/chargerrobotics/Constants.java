@@ -83,22 +83,24 @@ public final class Constants {
   public static final double hoodRetractAngle = 1800;
   public static final double defaultHoodSpeed = 0.30;
 
-  // Autonomous Drive Constants
-  public static final double driveGearRatio =
-      1.0; // My measurements bypass the gear reductions. If needed, it's 7.31 to 1.
-  public static final double momentOfInertia = 5; // This is a guess. Units: kilogram meter squared
-  public static final double robotMassKG = 54.4311; // Same as 120 pounds
-  public static final double wheelRadiusMeters = 0.0762;
-  public static final double wheelCircumferenceMeters = 2 * Math.PI * wheelRadiusMeters;
-  public static final double trackWidthMeters = 0.65;
-  public static final double encoderCPR =
-      42.0; // Counts per revolution according to NEO motor datasheet
-  public static final double encoderPPR =
-      encoderCPR / 4; // Pulses per revolution; 1 count is 4 pulses
-  public static final double motorRotationsPerWheelRev =
-      12.1425; // average of 13.732 (right) and 10.553 (left)
-  public static final double distancePerPulse =
-      wheelCircumferenceMeters / (encoderPPR * motorRotationsPerWheelRev);
+  public static final class DriveMetrics {
+    public static final double DRIVE_GEAR_RATIO =
+        1.0; // My measurements bypass the gear reductions. If needed, it's 7.31 to 1.
+    public static final double MOMENT_OF_INERTIA =
+        5; // This is a guess. Units: kilogram meter squared
+    public static final double ROBOT_MASS_KG = 54.4311; // Same as 120 pounds
+    public static final double WHEEL_RADIUS_METERS = 0.0762;
+    public static final double WHEEL_CIRCUMFERENCE_METERS = 2 * Math.PI * WHEEL_RADIUS_METERS;
+    public static final double TRACK_WIDTH_METERS = 0.65;
+    public static final double ENCODER_CPR =
+        42.0; // Counts per revolution according to NEO motor datasheet
+    public static final double ENCODER_PPR =
+        ENCODER_CPR / 4; // Pulses per revolution; 1 count is 4 pulses
+    public static final double MOTOR_ROTATIONS_PER_WHEEL_REV =
+        12.1425; // average of 13.732 (right) and 10.553 (left)
+    public static final double DISTANCE_PER_PULSE =
+        WHEEL_CIRCUMFERENCE_METERS / (ENCODER_PPR * MOTOR_ROTATIONS_PER_WHEEL_REV);
+  }
 
   // File Names
   public static final String dataStoragePath = "/home/lvuser";

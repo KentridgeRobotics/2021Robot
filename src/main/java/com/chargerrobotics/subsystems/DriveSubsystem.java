@@ -103,9 +103,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     if (RobotBase.isSimulation()) {
       fakeLeftEncoder = new Encoder(1, 2);
-      fakeLeftEncoder.setDistancePerPulse(Constants.distancePerPulse);
+      fakeLeftEncoder.setDistancePerPulse(Constants.DriveMetrics.DISTANCE_PER_PULSE);
       fakeRightEncoder = new Encoder(3, 4);
-      fakeRightEncoder.setDistancePerPulse(Constants.distancePerPulse);
+      fakeRightEncoder.setDistancePerPulse(Constants.DriveMetrics.DISTANCE_PER_PULSE);
       leftEncoderSim = new EncoderSim(fakeLeftEncoder);
       rightEncoderSim = new EncoderSim(fakeRightEncoder);
       fakeGyro = new AnalogGyro(1);
@@ -114,18 +114,18 @@ public class DriveSubsystem extends SubsystemBase {
       drivetrainSim =
           new DifferentialDrivetrainSim(
               DCMotor.getNEO(2),
-              Constants.driveGearRatio,
-              Constants.momentOfInertia,
-              Constants.robotMassKG,
-              Constants.wheelRadiusMeters,
-              Constants.trackWidthMeters,
+              Constants.DriveMetrics.DRIVE_GEAR_RATIO,
+              Constants.DriveMetrics.MOMENT_OF_INERTIA,
+              Constants.DriveMetrics.ROBOT_MASS_KG,
+              Constants.DriveMetrics.WHEEL_RADIUS_METERS,
+              Constants.DriveMetrics.TRACK_WIDTH_METERS,
               null); // Will not account for sensor measurement noise.
       field = new Field2d();
       SmartDashboard.putData("Field", field);
     }
   }
 
-  public void initOdometry(double x, double y) { // PROBLEMS
+  public void initOdometry(double x, double y) {
     odometry =
         new DifferentialDriveOdometry(
             RobotBase.isReal()
@@ -170,7 +170,9 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getLeftDistanceMeters() {
-    return leftFront.getEncoder().getPosition() * Constants.encoderPPR * Constants.distancePerPulse;
+    return leftFront.getEncoder().getPosition()
+        * Constants.DriveMetrics.ENCODER_PPR
+        * Constants.DriveMetrics.DISTANCE_PER_PULSE;
   }
 
   public double getOdoRight() {
@@ -179,8 +181,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   public double getRightDistanceMeters() {
     return rightFront.getEncoder().getPosition()
-        * Constants.encoderPPR
-        * Constants.distancePerPulse;
+        * Constants.DriveMetrics.ENCODER_PPR
+        * Constants.DriveMetrics.DISTANCE_PER_PULSE;
   }
 
   public void resetOdometry() {
