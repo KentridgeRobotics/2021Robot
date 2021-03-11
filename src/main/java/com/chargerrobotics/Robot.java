@@ -115,11 +115,13 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters autonomous mode. */
   @Override
   public void autonomousInit() {
+    ArduinoSerialReceiver.start();
+    robotContainer.setAutonomous();
     if (RobotBase.isReal()) {
-      robotContainer.setAutonomous();
-      ArduinoSerialReceiver.start();
-      robotContainer.leds.setMode(LEDMode.AUTONOMOUS);
-      LimelightSubsystem.getInstance().setLEDStatus(false);
+      robotContainer.leds.setMode(
+          LEDMode
+              .AUTONOMOUS); // According to RobotContainer, the LEDSubsystem will not initialize in
+      // a simulation
     }
   }
 
@@ -130,10 +132,13 @@ public class Robot extends TimedRobot {
   /** This function is called once each time the robot enters test mode. */
   @Override
   public void testInit() {
+    CommandScheduler.getInstance().cancelAll();
+    ArduinoSerialReceiver.close();
     if (RobotBase.isReal()) {
-      CommandScheduler.getInstance().cancelAll();
-      ArduinoSerialReceiver.close();
-      robotContainer.leds.setMode(LEDMode.DISABLED);
+      robotContainer.leds.setMode(
+          LEDMode
+              .DISABLED); // According to RobotContainer, the LEDSubsystem will not initialize in a
+      // simulation
     }
   }
 

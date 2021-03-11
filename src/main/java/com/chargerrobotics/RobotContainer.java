@@ -329,7 +329,6 @@ public class RobotContainer {
   public void setAutonomous() {
     if (driveEnabled && limelightEnabled) {
       limelightSubsystem.setLEDStatus(true);
-      alignToTarget.schedule();
     }
   }
 
