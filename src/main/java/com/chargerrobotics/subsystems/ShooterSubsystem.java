@@ -116,6 +116,29 @@ public class ShooterSubsystem extends SubsystemBase {
 		return (shooter1.getEncoder().getVelocity() + shooter2.getEncoder().getVelocity()) / 2;
 	}
 
+	public double desiredVelocity() {
+		//height : target height - camera height (meters)
+		//distance : comes from limelight (meters)
+		//gravity : 9.8 m/s 
+		//0.0254 converts inches to meters
+		
+		double height = 74.5 * 0.0254;
+        double distance = 120 * 0.0254;
+        double gravity = 9.8;
+		
+		double speed = Math.sqrt(((distance * distance) * gravity / (2 * height)) + 2 * height * gravity);
+
+		return speed;
+	}
+
+	public void calculateRPM(double speed) {
+		//original equation was y = 0.004245x - 1.711
+		//y is speed (velocity) and x is rpm
+		double rpm = (speed + 1.711) / 0.004245;
+
+		setSetPoint(rpm);
+	}
+	
 	@Override
 	public void periodic() {
 		super.periodic();
