@@ -33,7 +33,7 @@ public class HoodAutoCommand extends CommandBase {
   @Override
   public void initialize() {
     //If not calibrated, don't do anything
-    if (shooterHoodSubsystem.getCalibrated()) return;
+    if (!shooterHoodSubsystem.getCalibrated()) return;
     logger.info("HoodAuto starting");
     // Angle to target
     double angle = shooterHoodSubsystem.getDesiredAngleByZone();
@@ -64,7 +64,7 @@ public class HoodAutoCommand extends CommandBase {
   @Override
   public boolean isFinished() {
     //If not calibrated, end the command
-    if (shooterHoodSubsystem.getCalibrated()) return true;
+    if (!shooterHoodSubsystem.getCalibrated()) return true;
     // Same thing in initialize
     double angle = shooterHoodSubsystem.getDesiredAngleByZone();
     double position = shooterHoodSubsystem.getHoodPosition();
