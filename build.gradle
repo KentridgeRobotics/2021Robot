@@ -1,6 +1,7 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2021.1.2"
+    id "edu.wpi.first.GradleRIO" version "2021.2.2"
+    id "com.diffplug.spotless" version "5.9.0"
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -41,8 +42,8 @@ deploy {
 def includeDesktopSupport = false
 
 repositories {
-    maven { url 'https://jitpack.io' }	
-}	
+    maven { url 'https://jitpack.io' }
+}
 
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
@@ -51,7 +52,7 @@ dependencies {
     implementation 'com.github.Carleslc:Simple-YAML:1.4.1'
     implementation 'com.fazecast:jSerialComm:2.5.3'
     implementation 'org.slf4j:slf4j-api:1.7.30'
-    runtime 'ch.qos.logback:logback-classic:1.2.3'
+    runtimeOnly 'ch.qos.logback:logback-classic:1.2.3'
     implementation wpi.deps.wpilib()
     nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
@@ -61,7 +62,8 @@ dependencies {
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.testng:testng:6.9.10'
+    testImplementation 'org.mockito:mockito-core:2.22.0'
 
     // Enable simulation gui support. Must check the box in vscode to enable support
     // upon debugging
@@ -71,6 +73,23 @@ dependencies {
     // Websocket extensions require additional configuration.
     // simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, false)
     // simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, false)
+}
+
+def runUnitTestsOnly = project.hasProperty("runUnitTestsOnly")
+def runFunctionalTestsOnly = project.hasProperty("runFunctionalTestsOnly")
+
+test {
+    useTestNG() {
+        dependsOn cleanTest
+        if (runUnitTestsOnly) {
+            suites "src/test/resources/unit.xml"
+        } else if (runFunctionalTestsOnly) {
+            suites "src/test/resources/functional.xml"
+        } else {
+            suites "src/test/resources/functional.xml"
+            suites "src/test/resources/unit.xml"
+        }
+    }
 }
 
 // Simulation configuration (e.g. environment variables).
@@ -85,4 +104,29 @@ sim {
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+}
+
+
+// Setup spotless linting
+spotless {
+    // optional: limit format enforcement to just the files changed by this feature branch
+    ratchetFrom 'origin/master'
+
+    format 'misc', {
+        // define the files to apply `misc` to
+        target '*.gradle', '*.md', '.gitignore'
+
+        // define the steps to apply to those files
+        trimTrailingWhitespace()
+        indentWithSpaces() // Takes an integer argument if you don't like 4
+        endWithNewline()
+    }
+    java {
+        // apply a specific flavor of google-java-format
+        googleJavaFormat('1.8')
+
+        trimTrailingWhitespace()
+        endWithNewline()
+        removeUnusedImports()
+    }
 }
