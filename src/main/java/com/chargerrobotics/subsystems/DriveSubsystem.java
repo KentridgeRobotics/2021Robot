@@ -2,6 +2,7 @@ package com.chargerrobotics.subsystems;
 
 import com.chargerrobotics.Constants;
 import com.chargerrobotics.commands.drive.ManualDriveCommand;
+import com.chargerrobotics.utils.CANSparkMaxSim;
 import com.chargerrobotics.utils.XboxController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -14,13 +15,16 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -44,6 +48,8 @@ public class DriveSubsystem extends SubsystemBase {
   private DifferentialDrivetrainSim drivetrainSim;
 
   private DifferentialDrive differentialDrive;
+  private DifferentialDrive fakeDifferentialDrive;
+  private DifferentialDriveKinematics driveKinematics;
   private SpeedControllerGroup leftDriveGroup;
   private SpeedControllerGroup rightDriveGroup;
 
@@ -57,7 +63,6 @@ public class DriveSubsystem extends SubsystemBase {
   private boolean slow;
 
   private boolean autonomousRunning;
-  private boolean odometryInitialized;
 
   private XboxController driveController;
 
@@ -97,11 +102,12 @@ public class DriveSubsystem extends SubsystemBase {
     differentialDrive = new DifferentialDrive(leftDriveGroup, rightDriveGroup);
     differentialDrive.setDeadband(0.0);
 
-    odometryInitialized = false;
-
-    resetOdometry();
-
     if (RobotBase.isSimulation()) {
+      differentialDrive.close();
+      leftRear = new CANSparkMaxSim(Constants.leftRearDrive, MotorType.kBrushless);
+      leftFront = new CANSparkMaxSim(Constants.leftFrontDrive, MotorType.kBrushless);
+      rightRear = new CANSparkMaxSim(Constants.rightRearDrive, MotorType.kBrushless);
+      rightFront = new CANSparkMaxSim(Constants.rightFrontDrive, MotorType.kBrushless);
       fakeLeftEncoder = new Encoder(1, 2);
       fakeLeftEncoder.setDistancePerPulse(Constants.DriveMetrics.DISTANCE_PER_PULSE);
       fakeRightEncoder = new Encoder(3, 4);
@@ -113,26 +119,28 @@ public class DriveSubsystem extends SubsystemBase {
 
       drivetrainSim =
           new DifferentialDrivetrainSim(
+              LinearSystemId.identifyDrivetrainSystem(
+                  Constants.DriveMetrics.KV_LINEAR,
+                  Constants.DriveMetrics.KA_LINEAR,
+                  Constants.DriveMetrics.KV_ANGULAR,
+                  Constants.DriveMetrics.KA_ANGULAR),
               DCMotor.getNEO(2),
               Constants.DriveMetrics.DRIVE_GEAR_RATIO,
-              Constants.DriveMetrics.MOMENT_OF_INERTIA,
-              Constants.DriveMetrics.ROBOT_MASS_KG,
-              Constants.DriveMetrics.WHEEL_RADIUS_METERS,
               Constants.DriveMetrics.TRACK_WIDTH_METERS,
+              Constants.DriveMetrics.WHEEL_RADIUS_METERS,
               null); // Will not account for sensor measurement noise.
       field = new Field2d();
       SmartDashboard.putData("Field", field);
+      leftDriveGroup = new SpeedControllerGroup(leftFront, leftRear);
+      rightDriveGroup = new SpeedControllerGroup(rightFront, rightRear);
+      fakeDifferentialDrive = new DifferentialDrive(leftDriveGroup, rightDriveGroup);
+      fakeDifferentialDrive.setDeadband(0.0);
     }
-  }
-
-  public void initOdometry(double x, double y) {
+    driveKinematics = new DifferentialDriveKinematics(Constants.DriveMetrics.TRACK_WIDTH_METERS);
+    resetOdometry();
     odometry =
         new DifferentialDriveOdometry(
-            RobotBase.isReal()
-                ? new Rotation2d(gyroHeadingRadians)
-                : Rotation2d.fromDegrees(gyroSim.getAngle()),
-            new Pose2d(x, y, Rotation2d.fromDegrees(gyroHeadingRadians)));
-    odometryInitialized = true;
+            new Rotation2d(getGyroHeadingRadians())); // odometry will always default to
   }
 
   public void setAutonomousRunning(boolean autonomousRunning) {
@@ -170,9 +178,12 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getLeftDistanceMeters() {
-    return leftFront.getEncoder().getPosition()
-        * Constants.DriveMetrics.ENCODER_PPR
-        * Constants.DriveMetrics.DISTANCE_PER_PULSE;
+    if (RobotBase.isReal()) {
+      return leftFront.getEncoder().getPosition()
+          * Constants.DriveMetrics.ENCODER_PPR
+          * Constants.DriveMetrics.DISTANCE_PER_PULSE;
+    }
+    return fakeLeftEncoder.getDistance();
   }
 
   public double getOdoRight() {
@@ -180,14 +191,42 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getRightDistanceMeters() {
-    return rightFront.getEncoder().getPosition()
-        * Constants.DriveMetrics.ENCODER_PPR
-        * Constants.DriveMetrics.DISTANCE_PER_PULSE;
+    if (RobotBase.isReal()) {
+      return rightFront.getEncoder().getPosition()
+          * Constants.DriveMetrics.ENCODER_PPR
+          * Constants.DriveMetrics.DISTANCE_PER_PULSE;
+    }
+    return fakeRightEncoder.getDistance();
+  }
+
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    if (RobotBase.isReal()) {
+      double leftWheelSpeed = // Converts motor RPM to the wheels' velocity in meters per second
+          ((leftFront.getEncoder().getVelocity()
+                      / Constants.DriveMetrics.MOTOR_ROTATIONS_PER_WHEEL_REV)
+                  * Constants.DriveMetrics.WHEEL_CIRCUMFERENCE_METERS)
+              / 60;
+      double rightWheelSpeed = // Converts motor RPM to the wheels' velocity in meters per second
+          ((rightFront.getEncoder().getVelocity()
+                      / Constants.DriveMetrics.MOTOR_ROTATIONS_PER_WHEEL_REV)
+                  * Constants.DriveMetrics.WHEEL_CIRCUMFERENCE_METERS)
+              / 60;
+      return new DifferentialDriveWheelSpeeds(leftWheelSpeed, rightWheelSpeed);
+    }
+    return new DifferentialDriveWheelSpeeds(fakeLeftEncoder.getRate(), fakeRightEncoder.getRate());
   }
 
   public void resetOdometry() {
     leftFront.getEncoder().setPosition(0.0);
     rightFront.getEncoder().setPosition(0.0);
+  }
+
+  public void resetPose(Pose2d pose) {
+    resetOdometry();
+    odometry.resetPosition(pose, new Rotation2d(getGyroHeadingRadians()));
+    if (RobotBase.isSimulation()) {
+      drivetrainSim.setPose(pose);
+    }
   }
 
   public void passGyroHeadingRadians(float heading) {
@@ -200,7 +239,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return gyro heading in radians
    */
   public float getGyroHeadingRadians() {
-    return gyroHeadingRadians;
+    return RobotBase.isReal() ? gyroHeadingRadians : (float) -Math.toRadians(fakeGyro.getAngle());
   }
 
   public void setSpeeds(double left, double right) {
@@ -235,7 +274,24 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void arcadeDrive(double throttle, double turnRate) {
-    differentialDrive.arcadeDrive(throttle, turnRate);
+    if (RobotBase.isReal()) {
+      differentialDrive.arcadeDrive(throttle, turnRate);
+    } else {
+      fakeDifferentialDrive.arcadeDrive(turnRate, throttle); // yes this is intentional
+    }
+  }
+
+  public void tankDriveVolts(double left, double right) {
+    leftDriveGroup.setVoltage(left);
+    rightDriveGroup.setVoltage(right);
+  }
+
+  public Pose2d getPose() {
+    return odometry.getPoseMeters();
+  }
+
+  public DifferentialDriveKinematics getDriveKinematics() {
+    return driveKinematics;
   }
 
   @Override
@@ -244,18 +300,9 @@ public class DriveSubsystem extends SubsystemBase {
     if (!autonomousRunning) {
       tankDrive(leftThrottle, rightThrottle);
     }
-    if (odometryInitialized) {
-      if (RobotBase.isReal()) {
-        odometry.update(
-            new Rotation2d(gyroHeadingRadians), getLeftDistanceMeters(), getRightDistanceMeters());
-      } else {
-        odometry.update(
-            fakeGyro.getRotation2d(),
-            fakeLeftEncoder.getDistance(),
-            fakeRightEncoder.getDistance());
-        field.setRobotPose(odometry.getPoseMeters());
-      }
-    }
+    odometry.update(
+        new Rotation2d(getGyroHeadingRadians()), getLeftDistanceMeters(), getRightDistanceMeters());
+    field.setRobotPose(odometry.getPoseMeters());
   }
 
   @Override
