@@ -123,6 +123,7 @@ public class Robot extends TimedRobot {
               .AUTONOMOUS); // According to RobotContainer, the LEDSubsystem will not initialize in
       // a simulation
     }
+    robotContainer.getAutonomousCommand().schedule();
   }
 
   /** This function is called periodically during autonomous. */
