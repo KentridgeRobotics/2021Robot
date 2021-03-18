@@ -140,7 +140,9 @@ public class DriveSubsystem extends SubsystemBase {
     resetOdometry();
     odometry =
         new DifferentialDriveOdometry(
-            new Rotation2d(getGyroHeadingRadians())); // odometry will always default to
+            new Rotation2d(
+                getGyroHeadingRadians())); // the pose will always default to the origin with a
+    // heading of 0 radians
   }
 
   public void setAutonomousRunning(boolean autonomousRunning) {
