@@ -116,13 +116,14 @@ public class ShooterSubsystem extends SubsystemBase {
 		return (shooter1.getEncoder().getVelocity() + shooter2.getEncoder().getVelocity()) / 2;
 	}
 
-	public double desiredVelocity() {
+	public double desiredVelocity() { //parameters: double distance, double height from limelight
 		//height : target height - camera height (meters)
 		//distance : comes from limelight (meters)
 		//gravity : 9.8 m/s 
 		//0.0254 converts inches to meters
 		
-		double height = 74.5 * 0.0254;
+		//height and distance will be replaced with values of distance and height passed in from limelight
+		double height = 74.5 * 0.0254; 
         double distance = 120 * 0.0254;
         double gravity = 9.8;
 		
