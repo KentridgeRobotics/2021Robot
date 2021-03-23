@@ -10,6 +10,7 @@ public class CANSparkMaxSim extends CANSparkMax {
 
   public CANSparkMaxSim(int deviceID, MotorType type) {
     super(deviceID, type);
+    currentSpeed = 0.0;
     inverted = false;
   }
 
