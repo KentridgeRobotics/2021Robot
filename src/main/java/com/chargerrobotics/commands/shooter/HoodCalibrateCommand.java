@@ -28,5 +28,6 @@ public class HoodCalibrateCommand extends CommandBase {
     public void end(boolean interrupted) {
         shooterHoodSubsystem.setHoodSpeed(0);
         shooterHoodSubsystem.resetShooterEncoder(); // the limit switch is zero.
+        shooterHoodSubsystem.setCalibrated(true);
     }
 }

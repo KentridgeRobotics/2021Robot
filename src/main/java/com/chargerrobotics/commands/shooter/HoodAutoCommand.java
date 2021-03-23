@@ -11,8 +11,12 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import com.chargerrobotics.subsystems.LimelightSubsystem;
 import com.chargerrobotics.subsystems.ShooterHoodSubsystem;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class HoodAutoCommand extends CommandBase {
-  private final ShooterHoodSubsystem shooterSubsystem;
+  private static final Logger logger = LoggerFactory.getLogger(HoodAutoCommand.class);
+  private final ShooterHoodSubsystem shooterHoodSubsystem;
   private boolean isOpening;
   /**
    * Creates a new HoodAutoCommand.
@@ -20,28 +24,27 @@ public class HoodAutoCommand extends CommandBase {
    * Using the distance the robot is from the target, set the hood angle.
    * f(distance)
    */
-  public HoodAutoCommand(ShooterHoodSubsystem shooterSubsystem) {
-    this.shooterSubsystem = shooterSubsystem;
+  public HoodAutoCommand(ShooterHoodSubsystem shooterHoodSubsystem) {
+    this.shooterHoodSubsystem = shooterHoodSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    //If not calibrated, don't do anything
+    if (!shooterHoodSubsystem.getCalibrated()) return;
+    logger.info("HoodAuto starting");
     // Angle to target
-    double angle = shooterSubsystem.getAngleByZone();
+    double angle = shooterHoodSubsystem.getDesiredAngleByZone();
     // Ticks to Angle
-    double newposition = shooterSubsystem.findHoodTargetTicks(angle);
+    double newPosition = shooterHoodSubsystem.findHoodTargetTicks(angle);
     // Current Position
-    double position = shooterSubsystem.getHoodPosition();
+    double position = shooterHoodSubsystem.getHoodPosition();
     // Getting Direction
-    if (position < newposition) {
-       isOpening = true;
-    } else {
-      isOpening = false;
-    }
+    isOpening = position < newPosition;
     // Setting Motor Speed
-    shooterSubsystem.setHoodSpeed(isOpening ? 0.25 : -0.25);
+    shooterHoodSubsystem.setHoodSpeed(isOpening ? -0.25 : 0.25);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -52,18 +55,21 @@ public class HoodAutoCommand extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    logger.info("HoodAuto ended");
     // Stopping Motor
-    shooterSubsystem.setHoodSpeed(0.0);
+    shooterHoodSubsystem.setHoodSpeed(0.0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    //If not calibrated, end the command
+    if (!shooterHoodSubsystem.getCalibrated()) return true;
     // Same thing in initialize
-    double angle = shooterSubsystem.getAngleByZone();
-    double position = shooterSubsystem.getHoodPosition();
-    double newposition = shooterSubsystem.findHoodTargetTicks(angle);
+    double angle = shooterHoodSubsystem.getDesiredAngleByZone();
+    double position = shooterHoodSubsystem.getHoodPosition();
+    double newPosition = shooterHoodSubsystem.findHoodTargetTicks(angle);
     // Checking if the Position is Correct
-    return isOpening ? position >= newposition : position <= newposition;
+    return isOpening ? position >= newPosition : position <= newPosition;
   }
 }

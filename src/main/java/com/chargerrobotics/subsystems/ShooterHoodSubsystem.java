@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ShooterHoodSubsystem extends SubsystemBase {
     private static ShooterHoodSubsystem instance;
     private WPI_TalonSRX shooterHood;
+    private boolean calibrated;
 
     public static ShooterHoodSubsystem getInstance() {
         if (instance == null) {
@@ -27,6 +28,7 @@ public class ShooterHoodSubsystem extends SubsystemBase {
     }
 
     public ShooterHoodSubsystem() {
+        calibrated = false;
         shooterHood = new WPI_TalonSRX(Constants.shooterHood);
         shooterHood.setSafetyEnabled(false);
         shooterHood.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.QuadEncoder, Constants.hoodPIDLoopId, Constants.hoodTimeOutMs);
@@ -44,8 +46,16 @@ public class ShooterHoodSubsystem extends SubsystemBase {
         shooterHood.set(speed);
     }
 
+    public boolean getCalibrated() {
+        return calibrated;
+    }
+
+    public void setCalibrated(boolean calibrated) {
+        this.calibrated = calibrated;
+    }
+
     public double findHoodTargetTicks(double targetHoodAngDegrees) {
-        double outPut = -34.217*targetHoodAngDegrees + 2532.087;
+        double outPut = -34.217 * targetHoodAngDegrees + 2532.087;
         return outPut;
     }
 
@@ -58,37 +68,34 @@ public class ShooterHoodSubsystem extends SubsystemBase {
         return (double)shooterHood.getSensorCollection().getQuadraturePosition();
     }
     
-    public double getHoodAngle()  {
+    public double getDesiredAngle()  {
+        //Get the limelight subsystem
         LimelightSubsystem limelight = LimelightSubsystem.getInstance();
+        //The distance (inches) reported from the limelight
         double d = limelight.distance();
-        //double d needs to be the information coming from the limelight, the length reported from the limelight
-        double h = (Constants.targetHeight - Constants.cameraHeight);
-        //conversion from inches to meters    
-        double theta = Math.atan(2*h/d);
-        //calculations for theta of equatio
-    
+        //Determine the height to the target
+        double h = Constants.targetHeight - Constants.cameraHeight;
+        //Calculate the angle given height
+        double theta = Math.atan(2 * h / d);
+        //Return angle in degrees
         return Math.toDegrees(theta); 
     }
 
-    public double getAngleByZone() {
+    public double getDesiredAngleByZone() {
+        //Get the distance (inches) from the limelight
         LimelightSubsystem limelight = LimelightSubsystem.getInstance();
         double d = limelight.distance();
+
+        //We still need to test the best angles for each zone
+
         // green zone -- 0 to 90 inches
-        if (d >= 0 && d < 90) {
-            return 0.0;
-        }
+        if (d >= 0 && d < 90) return 45.0;
         // yellow zone
-        if (d >= 90 && d < 150) {
-            return 0.0;
-        }
+        if (d >= 90 && d < 150) return 0.0;
         // blue zone
-        if (d >= 150 && d < 210) {
-            return 0.0;
-        }
+        if (d >= 150 && d < 210) return 0.0;
         // red zone
-        if (d >= 210 && d < 270) {
-            return 0.0;
-        }
+        if (d >= 210 && d < 270) return 0.0;
 
         return 0.0;
     }
