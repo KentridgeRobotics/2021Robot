@@ -202,20 +202,24 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    double leftWheelSpeed = 0.0;
+    double rightWheelSpeed = 0.0;
     if (RobotBase.isReal()) {
-      double leftWheelSpeed = // Converts motor RPM to the wheels' velocity in meters per second
+      leftWheelSpeed = // Converts motor RPM to the wheels' velocity in meters per second
           ((leftFront.getEncoder().getVelocity()
                       / Constants.DriveMetrics.MOTOR_ROTATIONS_PER_WHEEL_REV)
                   * Constants.DriveMetrics.WHEEL_CIRCUMFERENCE_METERS)
               / 60;
-      double rightWheelSpeed = // Converts motor RPM to the wheels' velocity in meters per second
+      rightWheelSpeed = // Converts motor RPM to the wheels' velocity in meters per second
           ((rightFront.getEncoder().getVelocity()
                       / Constants.DriveMetrics.MOTOR_ROTATIONS_PER_WHEEL_REV)
                   * Constants.DriveMetrics.WHEEL_CIRCUMFERENCE_METERS)
               / 60;
-      return new DifferentialDriveWheelSpeeds(leftWheelSpeed, rightWheelSpeed);
+    } else {
+      leftWheelSpeed = fakeLeftEncoder.getRate();
+      rightWheelSpeed = fakeRightEncoder.getRate();
     }
-    return new DifferentialDriveWheelSpeeds(fakeLeftEncoder.getRate(), fakeRightEncoder.getRate());
+    return new DifferentialDriveWheelSpeeds(leftWheelSpeed, rightWheelSpeed);
   }
 
   public void resetOdometry() {
