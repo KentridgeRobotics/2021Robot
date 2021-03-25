@@ -122,6 +122,26 @@ public final class Constants {
   public static final String configFileName = "config.yml";
 
   // Limelight distance calculation constants
+
+  // Placeholder X and Y coords of markers on field in inches, given initiation line is marked south
+  // and the bottom left corner is (0, 0):
+  public static final double MARKER_ONE_X = 0;
+  public static final double MARKER_ONE_Y = 0;
+  public static final double MARKER_TWO_X = 0;
+  public static final double MARKER_TWO_Y = 21;
+  public static final double MARKER_THREE_X = 60;
+  public static final double MARKER_THREE_Y = 21;
+  public static final double MARKER_FOUR_X = 60;
+  public static final double MARKER_FOUR_Y = 0;
+
+  // Pipelines corresponding to significant targets:
+  public static final int shooterTarget = 0;
+  public static final int fuelTarget = 1;
+  public static final int MARKER1 = 2;
+  public static final int MARKER2 = 3;
+  public static final int MARKER3 = 4;
+  public static final int MARKER4 = 5;
+
   // Blitzen config:
   // public static final double targetHeight = 94.0; // inches
   // public static final double cameraHeight = 24.0; // inches
