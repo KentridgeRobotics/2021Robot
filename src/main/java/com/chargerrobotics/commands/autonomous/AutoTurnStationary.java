@@ -49,19 +49,17 @@ public class AutoTurnStationary extends CommandBase {
   private DifferentialDriveOdometry odometry; // odometry is like a graph on the floor and directions on how to get back to where it started
   private PIDController rotationPid;  //needed to figure speed for turning 
 
-  public AutoTurnStationary(DriveSubsystem drive, GyroscopeSerial gyro, SmartDashboardHelper smartDashboardHelper) {
+  public AutoTurnStationary(DriveSubsystem drive, GyroscopeSerial gyro, SmartDashboardHelper smartDashboardHelper, double targetAngle) {
     this.drive = drive;
     this.gyro = gyro;
     this.smartDashboardHelper = smartDashboardHelper;
-    
+    this.targetAngle = targetAngle;
+
     this.rotationPid = new PIDController(0.0, 0.0, 0.0);
     this.rotationPid.enableContinuousInput(-180.0, 180.0);
   }
 
-  public void SetTargetAngle(double angle)
-  {
-    this.targetAngle = angle;
-  }
+
 
   public PIDController GetRotationPID()
   {

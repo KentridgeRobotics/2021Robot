@@ -41,14 +41,7 @@ public class UT_AutoTurnStationary {
 
     }
     
-    
-  /**
-   * Test the 
-   *
-   * @param value The value returned by the physical controller
-   * @param hand The stick (left or right) to test against
-   * @param expectedValue The value that should be returned by as the reading
-   */
+
   @Test()
   public void testStartTurning90Degrees() {
     // Reset mock to ensure valid data
@@ -57,8 +50,7 @@ public class UT_AutoTurnStationary {
     reset(smartDashboardMock);
     //when (smartDashboardMock.getNumber("StationaryRotation", 90.0)).thenReturn(90.0);
 
-    AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
-    testCommand.SetTargetAngle(90);
+    AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
     testCommand.initialize();
     testCommand.execute();
 
@@ -100,8 +92,7 @@ public class UT_AutoTurnStationary {
   reset(driveMock);
   reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
-    testCommand.SetTargetAngle(0);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 0);
     testCommand.initialize();
     when (gyroMock.getHeading()).thenReturn(0.0f);
     testCommand.execute();
@@ -118,8 +109,7 @@ public class UT_AutoTurnStationary {
   reset(driveMock);
   reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
-    testCommand.SetTargetAngle(-90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), -90);
     testCommand.initialize();
     testCommand.execute();
 
@@ -135,8 +125,7 @@ public class UT_AutoTurnStationary {
   reset(driveMock);
   reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
-    testCommand.SetTargetAngle(90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
     testCommand.initialize();
     testCommand.execute();
 
@@ -152,8 +141,7 @@ public class UT_AutoTurnStationary {
   reset(driveMock);
   reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
-    testCommand.SetTargetAngle(90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
     testCommand.initialize();    
     when (gyroMock.getHeading()).thenReturn(89.0f);
     testCommand.execute();
@@ -164,14 +152,13 @@ public class UT_AutoTurnStationary {
   }
   
   @Test()
-  public void Turn91Degrees() {
+  public void TurnFrom91Degrees() {
   
   reset(gyroMock);
   reset(driveMock);
   reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper());
-    testCommand.SetTargetAngle(90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
     testCommand.initialize();    
     when (gyroMock.getHeading()).thenReturn(91.0f);
     testCommand.execute();
