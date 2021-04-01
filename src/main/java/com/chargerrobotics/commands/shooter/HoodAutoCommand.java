@@ -33,8 +33,10 @@ public class HoodAutoCommand extends CommandBase {
   @Override
   public void initialize() {
     //If not calibrated, don't do anything
-    if (!shooterHoodSubsystem.getCalibrated()) return;
-    logger.info("HoodAuto starting");
+    if (!shooterHoodSubsystem.getCalibrated()) {
+      logger.info("Cannot automatically move hood without calibrating it first!");
+      return;
+    }
     // Angle to target
     double angle = shooterHoodSubsystem.getDesiredAngleByZone();
     // Ticks to Angle
