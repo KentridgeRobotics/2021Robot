@@ -7,9 +7,7 @@
 
 package com.chargerrobotics;
 
-import com.chargerrobotics.subsystems.LEDSubsystem.LEDMode;
 import com.chargerrobotics.subsystems.LimelightSubsystem;
-import com.chargerrobotics.utils.ArduinoSerialReceiver;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -87,11 +85,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     robotContainer.setTeleop();
-    ArduinoSerialReceiver.start();
-    if (RobotBase.isReal()) {
-      robotContainer.leds.setMode(LEDMode.TELEOP);
-    }
-    LimelightSubsystem.getInstance().setLEDStatus(false);
   }
 
   /** This function is called periodically during operator control. */
@@ -102,10 +95,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     robotContainer.setDisabled();
-    ArduinoSerialReceiver.close();
-    if (RobotBase.isReal()) {
-      robotContainer.leds.setMode(LEDMode.DISABLED);
-    }
   }
 
   /** This function is called periodically when the robot is disabled. */
@@ -116,8 +105,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     robotContainer.setAutonomous();
-    ArduinoSerialReceiver.start();
-    robotContainer.leds.setMode(LEDMode.AUTONOMOUS);
     LimelightSubsystem.getInstance().setLEDStatus(false);
   }
 
@@ -129,8 +116,6 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
-    ArduinoSerialReceiver.close();
-    robotContainer.leds.setMode(LEDMode.DISABLED);
   }
 
   /** This function is called periodically during test mode. */
@@ -139,9 +124,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters simulation mode. */
   @Override
-  public void simulationInit() {
-    ArduinoSerialReceiver.close();
-  }
+  public void simulationInit() {}
 
   /** This function is called periodically during simulation mode. */
   @Override

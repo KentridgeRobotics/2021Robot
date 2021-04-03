@@ -7,25 +7,17 @@
 
 package com.chargerrobotics;
 
-import com.chargerrobotics.commands.autonomous.AutoDriveLinear;
 import com.chargerrobotics.commands.chomper.ChomperCalibrateCommand;
 import com.chargerrobotics.commands.chomper.ChomperDownPIDCommand;
 import com.chargerrobotics.commands.chomper.ChomperIntakeCommand;
 import com.chargerrobotics.commands.chomper.ChomperUpDownCommand;
 import com.chargerrobotics.commands.chomper.ChomperUpPIDCommand;
 import com.chargerrobotics.commands.chomper.ChomperVomitCommand;
-import com.chargerrobotics.commands.climber.ClimberDownCommand;
-import com.chargerrobotics.commands.climber.ClimberUpCommand;
-import com.chargerrobotics.commands.colorspinner.ColorSpinnerCommand;
-import com.chargerrobotics.commands.colorspinner.ColorSpinnerDeploy;
-import com.chargerrobotics.commands.colorspinner.ColorSpinnerRetract;
-import com.chargerrobotics.commands.colorspinner.ColorTargetCommand;
 import com.chargerrobotics.commands.drive.BoostCommand;
 import com.chargerrobotics.commands.drive.BrakeCommand;
+import com.chargerrobotics.commands.drive.InvertCommand;
 import com.chargerrobotics.commands.drive.ManualDriveCommand;
 import com.chargerrobotics.commands.drive.SlowCommand;
-import com.chargerrobotics.commands.feeder.FeederCommand;
-import com.chargerrobotics.commands.groups.VisionDrive;
 import com.chargerrobotics.commands.groups.VisionTurn;
 import com.chargerrobotics.commands.shooter.HoodCalibrateCommand;
 import com.chargerrobotics.commands.shooter.HoodManualCommand;
@@ -35,21 +27,13 @@ import com.chargerrobotics.commands.shooter.HoodRetractCommand;
 import com.chargerrobotics.commands.shooter.KickerCommand;
 import com.chargerrobotics.commands.shooter.ShooterOffCommand;
 import com.chargerrobotics.commands.shooter.ShooterOnCommand;
-import com.chargerrobotics.sensors.BallSensorSerial;
-import com.chargerrobotics.sensors.ColorSensorSerial;
-import com.chargerrobotics.sensors.GyroscopeSerial;
-import com.chargerrobotics.sensors.ScaleSerial;
 import com.chargerrobotics.subsystems.ChomperSubsystem;
-import com.chargerrobotics.subsystems.ClimberSubsystem;
-import com.chargerrobotics.subsystems.ColorSpinnerSubsystem;
 import com.chargerrobotics.subsystems.DriveSubsystem;
 import com.chargerrobotics.subsystems.FeedSubsystem;
 import com.chargerrobotics.subsystems.KickerSubsystem;
-import com.chargerrobotics.subsystems.LEDSubsystem;
 import com.chargerrobotics.subsystems.LimelightSubsystem;
 import com.chargerrobotics.subsystems.ShooterHoodSubsystem;
 import com.chargerrobotics.subsystems.ShooterSubsystem;
-import com.chargerrobotics.utils.ArduinoSerialReceiver;
 import com.chargerrobotics.utils.Config;
 import com.chargerrobotics.utils.XboxController;
 import edu.wpi.cscore.UsbCamera;
@@ -69,18 +53,14 @@ public class RobotContainer {
   private static final boolean limelightEnabled = true;
   private static final boolean driveEnabled = true;
   private static final boolean chomperEnabled = true;
-  private static final boolean feedEnabled = true;
   private static final boolean shooterEnabled = true;
   private static final boolean shooterHoodEnabled = true;
-  private static final boolean colorSpinnerEnabled = false;
-  private static final boolean climberEnabled = false;
 
   // Limelight
   private LimelightSubsystem limelightSubsystem;
 
   // Align to the target
   public VisionTurn alignToTarget;
-  public VisionDrive driveToTarget;
 
   // Drive
   private DriveSubsystem driveSubsystem;
@@ -88,7 +68,7 @@ public class RobotContainer {
   private BrakeCommand brakeCommand;
   private BoostCommand boostCommand;
   private SlowCommand slowCommand;
-  private AutoDriveLinear autoDriveLinear;
+  private InvertCommand invertCommand;
 
   // Shooter
   private ShooterSubsystem shooterSubsystem;
@@ -116,28 +96,6 @@ public class RobotContainer {
 
   // Feeder
   private FeedSubsystem feedSubsystem;
-  private FeederCommand feederCommand;
-
-  // Color Spinner
-  private ColorSpinnerSubsystem colorSpinnerSubsystem;
-  private ColorSpinnerCommand colorSpinnerCommand;
-  private ColorTargetCommand colorTargetCommand;
-  private ColorSpinnerDeploy colorSpinnerDeploy;
-  private ColorSpinnerRetract colorSpinnerRetract;
-
-  // Climber Spinner
-  private ClimberSubsystem climberSubsystem;
-  private ClimberUpCommand climberUpCommand;
-  private ClimberDownCommand climberDownCommand;
-
-  // Serial connection
-  public ColorSensorSerial colorSensor = new ColorSensorSerial();
-  public ScaleSerial scaleSensor = new ScaleSerial();
-  public GyroscopeSerial gyroscope = new GyroscopeSerial();
-  public BallSensorSerial ballSensor = new BallSensorSerial();
-
-  // LEDs
-  public LEDSubsystem leds;
 
   // controllers
   public XboxController primary;
@@ -170,37 +128,20 @@ public class RobotContainer {
   }
 
   private void setupSubsytemsAndCommands() {
-
-    ArduinoSerialReceiver.initialization(
-        () -> {
-          ballSensor.resetCount();
-        });
     Config.setup();
-
-    if (RobotBase.isReal()) {
-      // Do not initialize the LEDSubsytem unless on the real robot
-      // as it cannot be easily reset when simulating
-      leds = new LEDSubsystem();
-    }
-
-    if (feedEnabled) {
-      feedSubsystem = FeedSubsystem.getInstance();
-      feederCommand = new FeederCommand(feedSubsystem);
-    }
     if (driveEnabled) {
       driveSubsystem = DriveSubsystem.getInstance(primary);
       manualDriveCommand = new ManualDriveCommand(driveSubsystem, primary);
       brakeCommand = new BrakeCommand(driveSubsystem);
       boostCommand = new BoostCommand(driveSubsystem);
       slowCommand = new SlowCommand(driveSubsystem);
-      autoDriveLinear = new AutoDriveLinear(driveSubsystem, gyroscope);
+      invertCommand = new InvertCommand(driveSubsystem);
     }
     if (limelightEnabled) {
       limelightSubsystem = LimelightSubsystem.getInstance();
       if (driveEnabled) {
         // Vision Testing
         alignToTarget = new VisionTurn(limelightSubsystem, driveSubsystem);
-        driveToTarget = new VisionDrive(limelightSubsystem, driveSubsystem, 120);
       }
     }
     if (shooterEnabled) {
@@ -230,18 +171,6 @@ public class RobotContainer {
       manualchomperUpCommand = new ChomperUpDownCommand(true);
       manualchomperDownCommand = new ChomperUpDownCommand(false);
     }
-    if (colorSpinnerEnabled) {
-      colorSpinnerSubsystem = ColorSpinnerSubsystem.getInstance();
-      colorSpinnerCommand = new ColorSpinnerCommand(colorSpinnerSubsystem);
-      colorTargetCommand = new ColorTargetCommand(colorSpinnerSubsystem, colorSensor);
-      colorSpinnerDeploy = new ColorSpinnerDeploy();
-      colorSpinnerRetract = new ColorSpinnerRetract();
-    }
-    if (climberEnabled) {
-      climberSubsystem = ClimberSubsystem.getInstance();
-      climberUpCommand = new ClimberUpCommand(climberSubsystem);
-      climberDownCommand = new ClimberDownCommand(climberSubsystem);
-    }
   }
 
   public void setupCamera() {
@@ -265,51 +194,28 @@ public class RobotContainer {
       primary.buttonB.whileHeld(brakeCommand);
       primary.buttonBumperRight.whileHeld(boostCommand);
       primary.buttonBumperLeft.whileHeld(slowCommand);
-      primary.buttonPovLeft.whenPressed(autoDriveLinear);
+      primary.buttonMenu.whenPressed(invertCommand);
     }
     if (limelightEnabled) {
       primary.buttonX.whileHeld(alignToTarget);
-      primary.buttonY.whileHeld(driveToTarget);
-    }
-    if (climberEnabled) {
-      climberSubsystem.setStop();
-      primary.buttonPovUp.whileHeld(climberUpCommand);
-      primary.buttonPovDown.whileHeld(climberDownCommand);
-    }
-    if (chomperEnabled) {
-      primary.buttonPovUp.whenPressed(chomperUpCommand);
-      primary.buttonPovDown.whenPressed(chomperDownCommand);
-      primary.buttonMenu.whenPressed(chomperCalibrateCommand);
-      primary.buttonPovRight.whileHeld(manualchomperUpCommand);
     }
     // secondary
     if (shooterEnabled) {
       secondary.buttonA.whenPressed(shooterOnCommand);
       secondary.buttonB.whenPressed(shooterOffCommand);
-      secondary.buttonStickLeft.whileHeld(kickerCommand);
+      secondary.buttonBumperRight.whileHeld(kickerCommand);
     }
     if (shooterHoodEnabled) {
       secondary.buttonMenu.whenPressed(hoodCalibrateCommand);
-      secondary.buttonView.whenPressed(hoodPIDCommand);
-      // secondary.buttonPovUp.whenPressed(hoodPresetAngleCommand);
-      secondary.buttonPovUp.whileHeld(hoodManualUpCommand);
-      secondary.buttonPovDown.whileHeld(hoodManualDownCommand);
+      secondary.buttonY.whileHeld(hoodManualUpCommand);
+      secondary.buttonX.whileHeld(hoodManualDownCommand);
     }
     if (chomperEnabled) {
+      secondary.buttonView.whenPressed(chomperCalibrateCommand);
+      secondary.buttonPovUp.whenPressed(chomperUpCommand);
+      secondary.buttonPovDown.whenPressed(chomperDownCommand);
       secondary.buttonBumperLeft.whileHeld(chomperIntakeCommand);
-      secondary.buttonStickRight.whileHeld(chomperVomitCommand);
-      // secondary.buttonBumperRight.whenPressed(chomperCalibrateCommand);
-      // secondary.buttonView.whenPressed(chomperUpCommand);
-      // secondary.buttonMenu.whenPressed(chomperDownCommand);
-      // secondary.buttonA.whileHeld(manualchomperDownCommand);
-      // secondary.buttonB.whileHeld(manualchomperUpCommand);
-      // secondary.buttonX.whileHeld(manualchomperDownCommand);
-      // secondary.buttonY.whileHeld(manualchomperUpCommand);
-    }
-    if (colorSpinnerEnabled) {
-      secondary.buttonPovLeft.whenPressed(colorTargetCommand);
-      secondary.buttonPovUp.whenPressed(colorSpinnerDeploy);
-      secondary.buttonPovDown.whenPressed(colorSpinnerRetract);
+      secondary.buttonStickLeft.whileHeld(chomperVomitCommand);
     }
   }
 
