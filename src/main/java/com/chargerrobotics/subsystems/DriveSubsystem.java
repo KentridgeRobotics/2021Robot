@@ -30,6 +30,7 @@ public class DriveSubsystem extends SubsystemBase {
   private boolean brake;
   private boolean boost;
   private boolean slow;
+  private boolean inverted;
 
   private boolean autonomousRunning;
 
@@ -68,6 +69,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     differentialDrive = new DifferentialDrive(leftDriveGroup, rightDriveGroup);
     differentialDrive.setDeadband(0.0);
+
+    inverted = false;
   }
 
   public void setAutonomousRunning(boolean autonomousRunning) {
@@ -108,6 +111,10 @@ public class DriveSubsystem extends SubsystemBase {
     return rightFront.getEncoder().getPosition();
   }
 
+  public boolean getInverted() {
+    return inverted;
+  }
+
   public void setSpeeds(double left, double right) {
     leftDriveGroup.set(left);
     rightDriveGroup.set(right);
@@ -119,6 +126,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void setSlow(boolean slow) {
     this.slow = slow;
+  }
+
+  public void setInverted(boolean inverted) {
+    this.inverted = inverted;
   }
 
   public void tankDrive(double leftPower, double rightPower) {
@@ -134,9 +145,14 @@ public class DriveSubsystem extends SubsystemBase {
         rightPower *= 0.6;
       }
     }
+
+    if (inverted) {
+      differentialDrive.tankDrive(-rightPower, -leftPower);
+    } else {
+      differentialDrive.tankDrive(leftPower, rightPower);
+    }
     SmartDashboard.putNumber("TankDriveLeftPower", leftPower);
     SmartDashboard.putNumber("TankDriveRightPower", rightPower);
-    differentialDrive.tankDrive(leftPower, rightPower);
   }
 
   public void arcadeDrive(double throttle, double turnRate) {
