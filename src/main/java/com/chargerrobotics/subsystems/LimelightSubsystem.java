@@ -250,27 +250,27 @@ public class LimelightSubsystem extends SubsystemBase {
     if (dist != null) {
       SmartDashboard.putNumber("LimelightDistance", dist);
     } else {
-      SmartDashboard.putNumber("Distance to shooter target cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightDistance", -99999.99);
     }
     if (distM != null) {
       SmartDashboard.putNumber("LimelightDistanceM", distM);
     } else {
-      SmartDashboard.putNumber("Distance to a marker cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightDistanceM", -99999.99);
     }
     if (deg != null) {
       SmartDashboard.putNumber("LimelightCardinal", deg);
     } else {
-      SmartDashboard.putNumber("Cardinal rotation cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightCardinal", -99999.99);
     }
     if (lx != null) {
       SmartDashboard.putNumber("LimelightxCoord", lx);
     } else {
-      SmartDashboard.putNumber("Coordinates cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightxCoord", -99999.99);
     }
     if (ly != null) {
       SmartDashboard.putNumber("LimelightyCoord", ly);
     } else {
-      SmartDashboard.putNumber("Coordinates cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightyCoord", -99999.99);
     }
   }
 }
