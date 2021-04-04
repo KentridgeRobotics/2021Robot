@@ -146,6 +146,7 @@ public class RobotContainer {
     }
     if (shooterEnabled) {
       shooterSubsystem = ShooterSubsystem.getInstance();
+      feedSubsystem = FeedSubsystem.getInstance();
       shooterOnCommand = new ShooterOnCommand(shooterSubsystem);
       shooterOffCommand = new ShooterOffCommand(shooterSubsystem);
       kickerSubsystem = KickerSubsystem.getInstance();
@@ -163,13 +164,23 @@ public class RobotContainer {
     }
     if (chomperEnabled) {
       chomperSubsystem = ChomperSubsystem.getInstance();
+      feedSubsystem = FeedSubsystem.getInstance();
       chomperCalibrateCommand = new ChomperCalibrateCommand(chomperSubsystem);
       chomperIntakeCommand = new ChomperIntakeCommand(chomperSubsystem, feedSubsystem);
       chomperVomitCommand = new ChomperVomitCommand(chomperSubsystem);
-      chomperUpCommand = new ChomperUpPIDCommand(true, chomperSubsystem);
-      chomperDownCommand = new ChomperDownPIDCommand(false, chomperSubsystem);
+      chomperUpCommand = new ChomperUpPIDCommand(chomperSubsystem);
+      chomperDownCommand = new ChomperDownPIDCommand(chomperSubsystem);
       manualchomperUpCommand = new ChomperUpDownCommand(true);
       manualchomperDownCommand = new ChomperUpDownCommand(false);
+      CommandScheduler.getInstance()
+          .onCommandInitialize(
+              (command) -> {
+                if (command.equals(chomperUpCommand) && chomperDownCommand.isScheduled()) {
+                  chomperDownCommand.cancel();
+                } else if (command.equals(chomperDownCommand) && chomperUpCommand.isScheduled()) {
+                  chomperUpCommand.cancel();
+                }
+              });
     }
   }
 
@@ -215,7 +226,8 @@ public class RobotContainer {
       secondary.buttonPovUp.whenPressed(chomperUpCommand);
       secondary.buttonPovDown.whenPressed(chomperDownCommand);
       secondary.buttonBumperLeft.whileHeld(chomperIntakeCommand);
-      secondary.buttonStickLeft.whileHeld(chomperVomitCommand);
+      secondary.buttonStickRight.whileHeld(chomperVomitCommand);
+      secondary.buttonStickLeft.whileHeld(manualchomperUpCommand);
     }
   }
 
