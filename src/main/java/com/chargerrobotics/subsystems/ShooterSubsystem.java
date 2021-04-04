@@ -176,6 +176,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void periodic() {
     super.periodic();
     SmartDashboard.putNumber("DesiredVelocity", desiredVelocity());
+    SmartDashboard.putNumber("DesiredRPM", calculateRPM(desiredVelocity()));
     SmartDashboard.putNumber("ShooterSpeed", getAverageVelocity());
     SmartDashboard.putNumber("shooterSpeed1", shooter1.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooterSpeed2", shooter2.getEncoder().getVelocity());
