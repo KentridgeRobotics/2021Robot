@@ -7,7 +7,6 @@
 
 package com.chargerrobotics.commands.autonomous;
 
-import com.chargerrobotics.sensors.GyroscopeSerial;
 import com.chargerrobotics.subsystems.DriveSubsystem;
 
 import org.slf4j.Logger;
@@ -31,7 +30,6 @@ public class AutoDriveLinear extends CommandBase {
   private double initialHeading;
   private double desiredDistance;
   private final DriveSubsystem drive;
-  private final GyroscopeSerial gyro;
   private DifferentialDriveOdometry odometry;
   private static final String KEY = "LinearAutoDistance";
   private PIDController rotationPid;
@@ -47,9 +45,8 @@ public class AutoDriveLinear extends CommandBase {
   /**
    * Creates a new AutoDriveLinear.
    */
-  public AutoDriveLinear(DriveSubsystem drive, GyroscopeSerial gyro) {
+  public AutoDriveLinear(DriveSubsystem drive) {
     this.drive = drive;
-    this.gyro = gyro;
     addRequirements(drive);
     SmartDashboard.putNumber(KEY, 0.0);
     SmartDashboard.putNumber("linRotP", linRotP);
@@ -75,7 +72,7 @@ public class AutoDriveLinear extends CommandBase {
     initialRightDistance = drive.getOdoRight();
     currentLeftDistance = initialLeftDistance;
     currentRightDistance = initialRightDistance;
-    initialHeading = gyro.getHeading();
+    initialHeading = drive.getRobotHeading();
     currentHeading = initialHeading;
     desiredDistance = SmartDashboard.getNumber(KEY, 0.0);
     drive.setAutonomousRunning(true);
@@ -111,7 +108,7 @@ public class AutoDriveLinear extends CommandBase {
   public void execute() {
     currentLeftDistance = drive.getOdoLeft();
     currentRightDistance = drive.getOdoRight();
-    currentHeading = gyro.getHeading();
+    currentHeading = drive.getRobotHeading();
     Pose2d pose = odometry.update(getGyroHeading(), getDistanceLeft(), getDistanceRight());
     Rotation2d rotation = pose.getRotation();
     Translation2d translation = pose.getTranslation();
