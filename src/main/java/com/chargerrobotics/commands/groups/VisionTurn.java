@@ -7,18 +7,15 @@
 
 package com.chargerrobotics.commands.groups;
 
-import java.util.function.DoubleSupplier;
-
+import com.chargerrobotics.Constants;
 import com.chargerrobotics.subsystems.DriveSubsystem;
 import com.chargerrobotics.subsystems.LimelightSubsystem;
 import com.chargerrobotics.utils.NetworkMapping;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -30,24 +27,36 @@ public class VisionTurn extends PIDCommand {
   private static PIDController pid;
   private long startTime;
   private static final long delay = 250; // wait 250 ms for limelight to lock on
-  public final NetworkMapping<Double> kP = new NetworkMapping<Double>("vision_p", 0.015, val -> {
-    setPIDP(val);
-  });
-  public final NetworkMapping<Double> kI = new NetworkMapping<Double>("vision_i", 0.0, val -> {
-    setPIDI(val);
-  });
-  public final NetworkMapping<Double> kD = new NetworkMapping<Double>("vision_d", 0.0001, val -> {
-    setPIDD(val);
-  });
+  public final NetworkMapping<Double> kP =
+      new NetworkMapping<Double>(
+          "vision_p",
+          Constants.ALIGNMENT_P,
+          val -> {
+            setPIDP(val);
+          });
+  public final NetworkMapping<Double> kI =
+      new NetworkMapping<Double>(
+          "vision_i",
+          Constants.ALIGNMENT_I,
+          val -> {
+            setPIDI(val);
+          });
+  public final NetworkMapping<Double> kD =
+      new NetworkMapping<Double>(
+          "vision_d",
+          Constants.ALIGNMENT_D,
+          val -> {
+            setPIDD(val);
+          });
 
-  /**
-   * Creates a new VisionTurn.
-   */
-  public VisionTurn(final LimelightSubsystem limelightSubsystem, final DriveSubsystem driveSubsystem) {
+  /** Creates a new VisionTurn. */
+  public VisionTurn(
+      final LimelightSubsystem limelightSubsystem, final DriveSubsystem driveSubsystem) {
 
     super(
         // The controller that the command will use
-        setPID(new PIDController(0.015, 0.0, 0.0001)),
+        setPID(
+            new PIDController(Constants.ALIGNMENT_P, Constants.ALIGNMENT_I, Constants.ALIGNMENT_D)),
         // This should return the measurement
         () -> limelightSubsystem.getX(),
         // This should return the setpoint (can also be a constant)
@@ -55,9 +64,16 @@ public class VisionTurn extends PIDCommand {
         // This uses the output to move the robot
         output -> {
           driveSubsystem.setSpeeds(output, -output);
-          logger.info("Turn Target - Left: " + output + " Right: " + -output + " Distance: "
-              + limelightSubsystem.distance() + " inches");
-        }, limelightSubsystem);
+          logger.info(
+              "Turn Target - Left: "
+                  + output
+                  + " Right: "
+                  + -output
+                  + " Distance: "
+                  + limelightSubsystem.distance()
+                  + " inches");
+        },
+        limelightSubsystem);
 
     // Use addRequirements() here to declare subsystem dependencies.
     // Configure additional PID options by calling `getController` here.
@@ -66,7 +82,6 @@ public class VisionTurn extends PIDCommand {
     setPIDI(kI.getValue());
     setPIDD(kD.getValue());
   }
-
 
   private static PIDController setPID(PIDController pid) {
     VisionTurn.pid = pid;
