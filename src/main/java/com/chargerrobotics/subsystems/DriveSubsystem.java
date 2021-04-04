@@ -6,6 +6,8 @@ import com.chargerrobotics.utils.XboxController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,6 +16,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
   private static DriveSubsystem instance;
+
+  private NetworkTable table;
+
+  private double heading;
 
   private CANSparkMax leftRear;
   private CANSparkMax leftFront;
@@ -44,6 +50,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   public DriveSubsystem(XboxController driveController) {
     this.driveController = driveController;
+
+    table = NetworkTableInstance.getDefault().getTable("BNO055");
 
     leftRear = new CANSparkMax(Constants.leftRearDrive, MotorType.kBrushless);
     leftRear.setIdleMode(IdleMode.kCoast);
@@ -111,6 +119,10 @@ public class DriveSubsystem extends SubsystemBase {
     return rightFront.getEncoder().getPosition();
   }
 
+  public double getRobotHeading() {
+    return heading;
+  }
+
   public boolean getInverted() {
     return inverted;
   }
@@ -147,12 +159,13 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     if (inverted) {
-      differentialDrive.tankDrive(-rightPower, -leftPower);
+      differentialDrive.tankDrive(rightPower, leftPower);
     } else {
       differentialDrive.tankDrive(leftPower, rightPower);
     }
     SmartDashboard.putNumber("TankDriveLeftPower", leftPower);
     SmartDashboard.putNumber("TankDriveRightPower", rightPower);
+    SmartDashboard.putBoolean("isDriveInverted", inverted);
   }
 
   public void arcadeDrive(double throttle, double turnRate) {
@@ -162,6 +175,8 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     super.periodic();
+    heading = table.getEntry("euler_roll").getDouble(-1);
+    SmartDashboard.putNumber("heading", heading);
     if (!autonomousRunning) {
       tankDrive(leftThrottle, rightThrottle);
     }
