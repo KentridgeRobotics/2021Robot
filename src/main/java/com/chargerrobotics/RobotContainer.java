@@ -56,7 +56,20 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.controller.RamseteController;
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import java.util.List;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -329,11 +342,50 @@ public class RobotContainer {
   public void setAutonomous() {
     if (driveEnabled && limelightEnabled) {
       limelightSubsystem.setLEDStatus(true);
-      alignToTarget.schedule();
     }
   }
 
   public void setDisabled() {
     if (limelightEnabled) limelightSubsystem.setLEDStatus(false);
+  }
+
+  public Command getAutonomousCommand() {
+    DifferentialDriveVoltageConstraint autoVoltageConstraint =
+        new DifferentialDriveVoltageConstraint(
+            new SimpleMotorFeedforward(
+                Constants.DriveMetrics.KS_VOLTS, Constants.DriveMetrics.KV_LINEAR),
+            driveSubsystem.getDriveKinematics(),
+            Constants.DriveMetrics.MAX_DRIVE_VOLTS);
+
+    TrajectoryConfig config =
+        new TrajectoryConfig(Constants.DriveMetrics.MAX_VELOCITY, Constants.DriveMetrics.MAX_ACCEL)
+            .setKinematics(driveSubsystem.getDriveKinematics())
+            .addConstraint(autoVoltageConstraint);
+
+    Trajectory testTrajectory =
+        TrajectoryGenerator.generateTrajectory(
+            new Pose2d(1, 2, new Rotation2d()),
+            List.of(new Translation2d(2, 2)),
+            new Pose2d(4, 2, new Rotation2d()),
+            config);
+
+    RamseteCommand ramseteCommand =
+        new RamseteCommand(
+            testTrajectory,
+            driveSubsystem::getPose,
+            new RamseteController(
+                Constants.DriveMetrics.RAMSETE_B, Constants.DriveMetrics.RAMSETE_ZETA),
+            new SimpleMotorFeedforward(
+                Constants.DriveMetrics.KS_VOLTS,
+                Constants.DriveMetrics.KV_LINEAR,
+                Constants.DriveMetrics.KA_LINEAR),
+            driveSubsystem.getDriveKinematics(),
+            driveSubsystem::getWheelSpeeds,
+            new PIDController(Constants.DriveMetrics.KP, 0, 0),
+            new PIDController(Constants.DriveMetrics.KP, 0, 0),
+            driveSubsystem::tankDriveVolts,
+            driveSubsystem);
+    driveSubsystem.resetPose(testTrajectory.getInitialPose());
+    return ramseteCommand.andThen((() -> driveSubsystem.tankDriveVolts(0, 0)));
   }
 }
