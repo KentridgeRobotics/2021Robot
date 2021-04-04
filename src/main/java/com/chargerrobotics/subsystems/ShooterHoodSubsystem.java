@@ -28,12 +28,13 @@ public class ShooterHoodSubsystem extends SubsystemBase {
   public ShooterHoodSubsystem() {
     shooterHood = new WPI_TalonSRX(Constants.shooterHood);
     shooterHood.setSafetyEnabled(false);
-    shooterHood.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.QuadEncoder, Constants.hoodPIDLoopId,
-        Constants.hoodTimeOutMs);
+    shooterHood.configSelectedFeedbackSensor(
+        TalonSRXFeedbackDevice.QuadEncoder, Constants.hoodPIDLoopId, Constants.hoodTimeOutMs);
     shooterHood.setNeutralMode(NeutralMode.Brake);
     shooterHood.configPeakCurrentLimit(40);
     shooterHood.configContinuousCurrentLimit(30);
-    shooterHood.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    shooterHood.configForwardLimitSwitchSource(
+        LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
   }
 
   public void resetShooterEncoder() {
@@ -78,17 +79,13 @@ public class ShooterHoodSubsystem extends SubsystemBase {
     // We still need to test the best angles for each zone
 
     // green zone -- 0 to 90 inches
-    if (d >= 0 && d < 90)
-      return 45.0;
+    if (d >= 0 && d < 90) return 45.0;
     // yellow zone
-    if (d >= 90 && d < 150)
-      return 0.0;
+    if (d >= 90 && d < 150) return 0.0;
     // blue zone
-    if (d >= 150 && d < 210)
-      return 0.0;
+    if (d >= 150 && d < 210) return 0.0;
     // red zone
-    if (d >= 210 && d < 270)
-      return 0.0;
+    if (d >= 210 && d < 270) return 0.0;
 
     return 0.0;
   }
@@ -105,9 +102,9 @@ public class ShooterHoodSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     super.periodic();
-    if (isLimitSwitchTriggered())
-      resetShooterEncoder();
-    SmartDashboard.putNumber("hoodCurrPos", shooterHood.getSensorCollection().getQuadraturePosition());
+    if (isLimitSwitchTriggered()) resetShooterEncoder();
+    SmartDashboard.putNumber(
+        "hoodCurrPos", shooterHood.getSensorCollection().getQuadraturePosition());
     SmartDashboard.putNumber("hood Current", shooterHood.getSupplyCurrent());
     SmartDashboard.putBoolean("HoodTriggered?", isLimitSwitchTriggered());
   }

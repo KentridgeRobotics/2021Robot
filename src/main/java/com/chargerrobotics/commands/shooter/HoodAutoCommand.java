@@ -7,10 +7,8 @@
 
 package com.chargerrobotics.commands.shooter;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import com.chargerrobotics.subsystems.LimelightSubsystem;
 import com.chargerrobotics.subsystems.ShooterHoodSubsystem;
-
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +18,8 @@ public class HoodAutoCommand extends CommandBase {
   private boolean isOpening;
   /**
    * Creates a new HoodAutoCommand.
-   * 
-   * Using the distance the robot is from the target, set the hood angle.
-   * f(distance)
+   *
+   * <p>Using the distance the robot is from the target, set the hood angle. f(distance)
    */
   public HoodAutoCommand(ShooterHoodSubsystem shooterHoodSubsystem) {
     this.shooterHoodSubsystem = shooterHoodSubsystem;
@@ -32,7 +29,7 @@ public class HoodAutoCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //If not calibrated, don't do anything
+    // If not calibrated, don't do anything
     if (!shooterHoodSubsystem.getCalibrated()) {
       logger.info("Cannot automatically move hood without calibrating it first!");
       return;
@@ -52,8 +49,7 @@ public class HoodAutoCommand extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
@@ -66,7 +62,7 @@ public class HoodAutoCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    //If not calibrated, end the command
+    // If not calibrated, end the command
     if (!shooterHoodSubsystem.getCalibrated()) return true;
     // Same thing in initialize
     double angle = shooterHoodSubsystem.getDesiredAngleByZone();
