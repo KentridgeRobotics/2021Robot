@@ -103,6 +103,8 @@ public class ShooterHoodSubsystem extends SubsystemBase {
   public void periodic() {
     super.periodic();
     if (isLimitSwitchTriggered()) resetShooterEncoder();
+    SmartDashboard.putNumber("DesiredAngle", getDesiredAngle());
+    SmartDashboard.putNumber("DesiredHoodPosition", findHoodTargetTicks(getDesiredAngle()));
     SmartDashboard.putNumber(
         "hoodCurrPos", shooterHood.getSensorCollection().getQuadraturePosition());
     SmartDashboard.putNumber("hood Current", shooterHood.getSupplyCurrent());
