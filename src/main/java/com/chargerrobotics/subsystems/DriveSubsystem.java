@@ -153,8 +153,8 @@ public class DriveSubsystem extends SubsystemBase {
         leftPower *= 0.3;
         rightPower *= 0.3;
       } else {
-        leftPower *= 0.6;
-        rightPower *= 0.6;
+        leftPower *= 0.5;
+        rightPower *= 0.5;
       }
     }
 
@@ -169,6 +169,18 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void arcadeDrive(double throttle, double turnRate) {
+    if (this.brake) {
+      throttle *= 0.0;
+      turnRate *= 0.0;
+    } else if (!this.boost) {
+      if (this.slow) {
+        throttle *= 0.3;
+        turnRate *= 0.3;
+      } else {
+        throttle *= 0.5;
+        turnRate *= 0.5;
+      }
+    }
     differentialDrive.arcadeDrive(throttle, turnRate);
   }
 

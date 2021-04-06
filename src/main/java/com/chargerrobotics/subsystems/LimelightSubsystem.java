@@ -24,6 +24,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private static LimelightSubsystem instance;
 
   private double x, y, v, s, p;
+  private double lastDistance = 0;
 
   public LimelightSubsystem() {
     table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -224,8 +225,9 @@ public class LimelightSubsystem extends SubsystemBase {
        * another, check the angle of the LimeLight camera. If it gets bumped and the angle changes
        * then everything will be off. That is really the main variable that can get bumped.
        */
-      return ((Constants.targetHeight - Constants.cameraHeight)
+      lastDistance = ((Constants.targetHeight - Constants.cameraHeight)
           / Math.tan(Math.toRadians(Constants.cameraAngle + y)));
+      return lastDistance;
     }
   }
 
@@ -250,7 +252,7 @@ public class LimelightSubsystem extends SubsystemBase {
     if (dist != null) {
       SmartDashboard.putNumber("LimelightDistance", dist);
     } else {
-      SmartDashboard.putNumber("LimelightDistance", -99999.99);
+      SmartDashboard.putNumber("LimelightDistance", lastDistance);
     }
     if (distM != null) {
       SmartDashboard.putNumber("LimelightDistanceM", distM);

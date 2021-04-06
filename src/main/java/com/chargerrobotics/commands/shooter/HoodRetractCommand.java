@@ -7,40 +7,68 @@
 
 package com.chargerrobotics.commands.shooter;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
 import com.chargerrobotics.subsystems.ShooterHoodSubsystem;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HoodRetractCommand extends CommandBase {
+  private static final Logger logger = LoggerFactory.getLogger(HoodRetractCommand.class);
   private final ShooterHoodSubsystem shooterHoodSubsystem;
-  private final double hoodRetractSetPoint;
+  private boolean isOpening;
   /**
-   * Creates a new HoodRetractCommand.
+   * Creates a new HoodAutoCommand.
+   *
+   * <p>Using the distance the robot is from the target, set the hood angle. f(distance)
    */
-  public HoodRetractCommand(ShooterHoodSubsystem shooterHoodSubsystem, double hoodRetractSetPoint) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public HoodRetractCommand(ShooterHoodSubsystem shooterHoodSubsystem) {
     this.shooterHoodSubsystem = shooterHoodSubsystem;
-    this.hoodRetractSetPoint = hoodRetractSetPoint;
+    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    // If not calibrated, don't do anything
+    if (!shooterHoodSubsystem.getCalibrated()) {
+      logger.info("Cannot automatically move hood without calibrating it first!");
+      return;
+    }
+    logger.info("HoodRetract starting");
+    // Angle to target
+    double angle = 30;
+    // Ticks to Angle
+    double newPosition = shooterHoodSubsystem.findHoodTargetTicks(angle);
+    // Current Position
+    double position = shooterHoodSubsystem.getHoodPosition();
+    // Getting Direction
+    isOpening = position < newPosition;
+    // Setting Motor Speed
+    shooterHoodSubsystem.setHoodSpeed(isOpening ? -0.25 : 0.25);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    //shooterHoodSubsystem.setPosition(hoodRetractSetPoint);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    logger.info("HoodRetract ended");
+    // Stopping Motor
+    shooterHoodSubsystem.setHoodSpeed(0.0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    // If not calibrated, end the command
+    if (!shooterHoodSubsystem.getCalibrated()) return true;
+    // Same thing in initialize
+    double angle = 30;
+    double position = shooterHoodSubsystem.getHoodPosition();
+    double newPosition = shooterHoodSubsystem.findHoodTargetTicks(angle);
+    // Checking if the Position is Correct
+    return isOpening ? position >= newPosition : position <= newPosition;
   }
 }

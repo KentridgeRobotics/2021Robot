@@ -36,7 +36,7 @@ public class HoodAutoCommand extends CommandBase {
     }
     logger.info("HoodAuto starting");
     // Angle to target
-    double angle = shooterHoodSubsystem.getDesiredAngleByZone();
+    double angle = shooterHoodSubsystem.getDesiredAngle();
     // Ticks to Angle
     double newPosition = shooterHoodSubsystem.findHoodTargetTicks(angle);
     // Current Position
@@ -65,7 +65,7 @@ public class HoodAutoCommand extends CommandBase {
     // If not calibrated, end the command
     if (!shooterHoodSubsystem.getCalibrated()) return true;
     // Same thing in initialize
-    double angle = shooterHoodSubsystem.getDesiredAngleByZone();
+    double angle = shooterHoodSubsystem.getDesiredAngle();
     double position = shooterHoodSubsystem.getHoodPosition();
     double newPosition = shooterHoodSubsystem.findHoodTargetTicks(angle);
     // Checking if the Position is Correct

@@ -9,6 +9,7 @@ import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpiutil.math.MathUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -154,7 +155,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // height and distance will be replaced with values of distance and height passed in from
     // limelight
-    double height = 74.5 * 0.0254;
+    double height = (Constants.targetHeight - Constants.cameraHeight) * 0.0254;
     double distance = SmartDashboard.getNumber("LimelightDistance", 0) * 0.0254;
     double gravity = 9.8;
 
@@ -169,7 +170,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // y is speed (velocity) and x is rpm
     double rpm = (speed + 1.711) / 0.004245;
 
-    return rpm;
+    return MathUtil.clamp(rpm+1000, 0, 5676);
   }
 
   @Override
@@ -177,7 +178,7 @@ public class ShooterSubsystem extends SubsystemBase {
     super.periodic();
     SmartDashboard.putNumber("DesiredVelocity", desiredVelocity());
     SmartDashboard.putNumber("DesiredRPM", calculateRPM(desiredVelocity()));
-    SmartDashboard.putNumber("ShooterSpeed", getAverageVelocity());
+    SmartDashboard.putNumber("ShooterSpeed", Math.abs(getAverageVelocity()));
     SmartDashboard.putNumber("shooterSpeed1", shooter1.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooterSpeed2", shooter2.getEncoder().getVelocity());
     SmartDashboard.putNumber("motor1temp", shooter1.getMotorTemperature());

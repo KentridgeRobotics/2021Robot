@@ -19,6 +19,7 @@ import com.chargerrobotics.commands.drive.InvertCommand;
 import com.chargerrobotics.commands.drive.ManualDriveCommand;
 import com.chargerrobotics.commands.drive.SlowCommand;
 import com.chargerrobotics.commands.groups.VisionTurn;
+import com.chargerrobotics.commands.shooter.HoodAutoCommand;
 import com.chargerrobotics.commands.shooter.HoodCalibrateCommand;
 import com.chargerrobotics.commands.shooter.HoodManualCommand;
 import com.chargerrobotics.commands.shooter.HoodPIDCommand;
@@ -79,8 +80,7 @@ public class RobotContainer {
   private HoodManualCommand hoodManualUpCommand;
   private HoodManualCommand hoodManualDownCommand;
   private HoodCalibrateCommand hoodCalibrateCommand;
-  private HoodPIDCommand hoodPIDCommand;
-  private HoodPresetAngleCommand hoodPresetAngleCommand;
+  private HoodAutoCommand hoodAutoCommand;
   private HoodRetractCommand hoodRetractCommand;
   private KickerCommand kickerCommand;
 
@@ -157,10 +157,8 @@ public class RobotContainer {
       hoodManualUpCommand = new HoodManualCommand(shooterHoodSubsystem, true);
       hoodManualDownCommand = new HoodManualCommand(shooterHoodSubsystem, false);
       hoodCalibrateCommand = new HoodCalibrateCommand(shooterHoodSubsystem);
-      hoodPIDCommand = new HoodPIDCommand(shooterHoodSubsystem);
-      hoodPresetAngleCommand =
-          new HoodPresetAngleCommand(shooterHoodSubsystem, Constants.hoodPresetAngle);
-      hoodRetractCommand = new HoodRetractCommand(shooterHoodSubsystem, Constants.hoodRetractAngle);
+      hoodAutoCommand = new HoodAutoCommand(shooterHoodSubsystem);
+      hoodRetractCommand = new HoodRetractCommand(shooterHoodSubsystem);
     }
     if (chomperEnabled) {
       chomperSubsystem = ChomperSubsystem.getInstance();
@@ -212,8 +210,8 @@ public class RobotContainer {
     }
     // secondary
     if (shooterEnabled) {
-      secondary.buttonA.whenPressed(shooterOnCommand);
-      secondary.buttonB.whenPressed(shooterOffCommand);
+      secondary.buttonA.whenPressed(shooterOnCommand.alongWith(hoodAutoCommand));
+      secondary.buttonB.whenPressed(shooterOffCommand.alongWith(hoodRetractCommand));
       secondary.buttonBumperRight.whileHeld(kickerCommand);
     }
     if (shooterHoodEnabled) {
