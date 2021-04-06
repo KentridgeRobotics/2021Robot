@@ -22,8 +22,6 @@ import com.chargerrobotics.commands.groups.VisionTurn;
 import com.chargerrobotics.commands.shooter.HoodAutoCommand;
 import com.chargerrobotics.commands.shooter.HoodCalibrateCommand;
 import com.chargerrobotics.commands.shooter.HoodManualCommand;
-import com.chargerrobotics.commands.shooter.HoodPIDCommand;
-import com.chargerrobotics.commands.shooter.HoodPresetAngleCommand;
 import com.chargerrobotics.commands.shooter.HoodRetractCommand;
 import com.chargerrobotics.commands.shooter.KickerCommand;
 import com.chargerrobotics.commands.shooter.ShooterOffCommand;

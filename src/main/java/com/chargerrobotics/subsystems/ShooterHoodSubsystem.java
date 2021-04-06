@@ -61,15 +61,15 @@ public class ShooterHoodSubsystem extends SubsystemBase {
 
   public double getDesiredAngle() {
     // Get the limelight subsystem
-    //LimelightSubsystem limelight = LimelightSubsystem.getInstance();
+    // LimelightSubsystem limelight = LimelightSubsystem.getInstance();
     // The distance (inches) reported from the limelight
     double d = SmartDashboard.getNumber("LimelightDistance", 0);
     // Determine the height to the target
     double h = Constants.targetHeight - Constants.cameraHeight;
     // Calculate the angle given height
-    double theta = Math.atan(h/d); //Math.atan(2 * h / d);
+    double theta = Math.atan(h / d); // Math.atan(2 * h / d);
     // Return angle in degrees
-    return MathUtil.clamp((83-Math.toDegrees(theta)), 30, 74);
+    return MathUtil.clamp((83 - Math.toDegrees(theta)), 30, 74);
   }
 
   /*public double getDesiredAngleByZone() {

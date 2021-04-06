@@ -225,8 +225,9 @@ public class LimelightSubsystem extends SubsystemBase {
        * another, check the angle of the LimeLight camera. If it gets bumped and the angle changes
        * then everything will be off. That is really the main variable that can get bumped.
        */
-      lastDistance = ((Constants.targetHeight - Constants.cameraHeight)
-          / Math.tan(Math.toRadians(Constants.cameraAngle + y)));
+      lastDistance =
+          ((Constants.targetHeight - Constants.cameraHeight)
+              / Math.tan(Math.toRadians(Constants.cameraAngle + y)));
       return lastDistance;
     }
   }

@@ -170,7 +170,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // y is speed (velocity) and x is rpm
     double rpm = (speed + 1.711) / 0.004245;
 
-    return MathUtil.clamp(rpm+1000, 0, 5676);
+    return MathUtil.clamp(rpm + 1000, 0, 5676);
   }
 
   @Override
