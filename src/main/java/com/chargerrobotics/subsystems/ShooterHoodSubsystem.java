@@ -69,7 +69,7 @@ public class ShooterHoodSubsystem extends SubsystemBase {
     // Calculate the angle given height
     double theta = Math.atan(h / d); // Math.atan(2 * h / d);
     // Return angle in degrees
-    return MathUtil.clamp((83 - Math.toDegrees(theta)), 30, 74);
+    return MathUtil.clamp((80 - Math.toDegrees(theta)), 30, 74);
   }
 
   /*public double getDesiredAngleByZone() {

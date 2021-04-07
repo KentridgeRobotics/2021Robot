@@ -44,7 +44,7 @@ public class HoodAutoCommand extends CommandBase {
     // Getting Direction
     isOpening = position < newPosition;
     // Setting Motor Speed
-    shooterHoodSubsystem.setHoodSpeed(isOpening ? -0.25 : 0.25);
+    shooterHoodSubsystem.setHoodSpeed(isOpening ? -0.2 : 0.2);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

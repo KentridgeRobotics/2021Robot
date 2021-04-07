@@ -37,6 +37,7 @@ public class DriveSubsystem extends SubsystemBase {
   private boolean boost;
   private boolean slow;
   private boolean inverted;
+  private boolean inTankDrive;
 
   private boolean autonomousRunning;
 
@@ -79,6 +80,7 @@ public class DriveSubsystem extends SubsystemBase {
     differentialDrive.setDeadband(0.0);
 
     inverted = false;
+    inTankDrive = true;
   }
 
   public void setAutonomousRunning(boolean autonomousRunning) {
@@ -127,6 +129,10 @@ public class DriveSubsystem extends SubsystemBase {
     return inverted;
   }
 
+  public boolean getInTankDrive() {
+    return inTankDrive;
+  }
+
   public void setSpeeds(double left, double right) {
     leftDriveGroup.set(left);
     rightDriveGroup.set(right);
@@ -144,6 +150,10 @@ public class DriveSubsystem extends SubsystemBase {
     this.inverted = inverted;
   }
 
+  public void setInTankDrive(boolean inTankDrive) {
+    this.inTankDrive = inTankDrive;
+  }
+
   public void tankDrive(double leftPower, double rightPower) {
     if (this.brake) {
       leftPower *= 0.0;
@@ -153,19 +163,18 @@ public class DriveSubsystem extends SubsystemBase {
         leftPower *= 0.3;
         rightPower *= 0.3;
       } else {
-        leftPower *= 0.5;
-        rightPower *= 0.5;
+        leftPower *= 0.6;
+        rightPower *= 0.6;
       }
     }
 
     if (inverted) {
       differentialDrive.tankDrive(rightPower, leftPower);
+      SmartDashboard.putString("DriveMode", "Tank, inverted");
     } else {
       differentialDrive.tankDrive(leftPower, rightPower);
+      SmartDashboard.putString("DriveMode", "Tank, Normal");
     }
-    SmartDashboard.putNumber("TankDriveLeftPower", leftPower);
-    SmartDashboard.putNumber("TankDriveRightPower", rightPower);
-    SmartDashboard.putBoolean("isDriveInverted", inverted);
   }
 
   public void arcadeDrive(double throttle, double turnRate) {
@@ -177,11 +186,17 @@ public class DriveSubsystem extends SubsystemBase {
         throttle *= 0.3;
         turnRate *= 0.3;
       } else {
-        throttle *= 0.5;
-        turnRate *= 0.5;
+        throttle *= 0.6;
+        turnRate *= 0.6;
       }
     }
-    differentialDrive.arcadeDrive(throttle, turnRate);
+    if (inverted) {
+      differentialDrive.arcadeDrive(throttle, -turnRate);
+      SmartDashboard.putString("DriveMode", "Arcade, Inverted");
+    } else {
+      differentialDrive.arcadeDrive(throttle, turnRate);
+      SmartDashboard.putString("DriveMode", "Arcade, Normal");
+    }
   }
 
   @Override
@@ -190,7 +205,11 @@ public class DriveSubsystem extends SubsystemBase {
     heading = table.getEntry("euler_roll").getDouble(-1);
     SmartDashboard.putNumber("heading", heading);
     if (!autonomousRunning) {
-      tankDrive(leftThrottle, rightThrottle);
+      if(inTankDrive) {
+        tankDrive(leftThrottle, rightThrottle);
+      } else {
+        arcadeDrive(rightThrottle, leftThrottle); // Same issue as the simulation
+      }
     }
   }
 

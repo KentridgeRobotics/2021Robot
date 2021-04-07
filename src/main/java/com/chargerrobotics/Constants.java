@@ -74,9 +74,9 @@ public final class Constants {
   public static final int hoodGainSlot = 0;
   public static final int hoodTimeOutMs = 30;
   public static final int ticksPerRev = 0;
-  public static final double hoodP = 0.0007;
-  public static final double hoodI = 0.00038;
-  public static final double hoodD = 0.0;
+  public static final double hoodP = 0.00033; //0.0007
+  public static final double hoodI = 0.0003; //0.00038
+  public static final double hoodD = 0.0; //0.0
   public static final double hoodF = 0.0;
 
   public static final double hoodPresetAngle = 500;

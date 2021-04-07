@@ -18,6 +18,7 @@ import com.chargerrobotics.commands.drive.BrakeCommand;
 import com.chargerrobotics.commands.drive.InvertCommand;
 import com.chargerrobotics.commands.drive.ManualDriveCommand;
 import com.chargerrobotics.commands.drive.SlowCommand;
+import com.chargerrobotics.commands.drive.SwitchDriveModeCommand;
 import com.chargerrobotics.commands.groups.VisionTurn;
 import com.chargerrobotics.commands.shooter.HoodAutoCommand;
 import com.chargerrobotics.commands.shooter.HoodCalibrateCommand;
@@ -68,6 +69,7 @@ public class RobotContainer {
   private BoostCommand boostCommand;
   private SlowCommand slowCommand;
   private InvertCommand invertCommand;
+  private SwitchDriveModeCommand switchDriveModeCommand;
 
   // Shooter
   private ShooterSubsystem shooterSubsystem;
@@ -134,6 +136,7 @@ public class RobotContainer {
       boostCommand = new BoostCommand(driveSubsystem);
       slowCommand = new SlowCommand(driveSubsystem);
       invertCommand = new InvertCommand(driveSubsystem);
+      switchDriveModeCommand = new SwitchDriveModeCommand(driveSubsystem);
     }
     if (limelightEnabled) {
       limelightSubsystem = LimelightSubsystem.getInstance();
@@ -201,7 +204,8 @@ public class RobotContainer {
       primary.buttonB.whileHeld(brakeCommand);
       primary.buttonBumperRight.whileHeld(boostCommand);
       primary.buttonBumperLeft.whileHeld(slowCommand);
-      primary.buttonMenu.whenPressed(invertCommand);
+      primary.buttonStickRight.whenPressed(invertCommand);
+      primary.buttonStickLeft.whenPressed(switchDriveModeCommand);
     }
     if (limelightEnabled) {
       primary.buttonX.whileHeld(alignToTarget);
