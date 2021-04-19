@@ -29,27 +29,30 @@ public class AutoDriveLinear extends CommandBase {
   private double currentRightDistance;
   private double currentHeading;
   private double initialHeading;
-  private double desiredDistance;
   private final DriveSubsystem drive;
   private final GyroscopeSerial gyro;
+  private final double targetDistance;   
   private DifferentialDriveOdometry odometry;
   private static final String KEY = "LinearAutoDistance";
   private PIDController rotationPid;
   private PIDController translationPid;
-  private double linRotP = SmartDashboard.getNumber("linRotP", 0.0);
+  private double linRotP = SmartDashboard.getNumber("linRotP", 0.005);
   private double linRotI = SmartDashboard.getNumber("linRotI", 0.0);
   private double linRotD = SmartDashboard.getNumber("linRotD", 0.0);
-  private double linRotTolerance = SmartDashboard.getNumber("linRotTolerance", 0.0);
-  private double linTransP = SmartDashboard.getNumber("linTransP", 0.0);
+  private double linRotTolerance = SmartDashboard.getNumber("linRotTolerance", 0.05);
+  private double linTransP = SmartDashboard.getNumber("linTransP", 0.005);
   private double linTransI = SmartDashboard.getNumber("linTransI", 0.0);
   private double linTransD = SmartDashboard.getNumber("linTransD", 0.0);
-  private double linTransTolerance = SmartDashboard.getNumber("linTransTolerance", 0.0);
+  private double linTransTolerance = SmartDashboard.getNumber("linTransTolerance", 0.05);
+  private double lastRotationOutput;
+  private double lastDriveOutput;
   /**
    * Creates a new AutoDriveLinear.
    */
-  public AutoDriveLinear(DriveSubsystem drive, GyroscopeSerial gyro) {
+  public AutoDriveLinear(DriveSubsystem drive, GyroscopeSerial gyro, double targetDistance) {
     this.drive = drive;
     this.gyro = gyro;
+    this.targetDistance = targetDistance;
     addRequirements(drive);
     SmartDashboard.putNumber(KEY, 0.0);
     SmartDashboard.putNumber("linRotP", linRotP);
@@ -61,11 +64,16 @@ public class AutoDriveLinear extends CommandBase {
     SmartDashboard.putNumber("linTransD", linTransD);
     SmartDashboard.putNumber("linTransTolerance", linTransTolerance);
     this.rotationPid = new PIDController(0.0, 0.0, 0.0);
-    this.rotationPid.enableContinuousInput(0.0, 360.0);
+    this.rotationPid.enableContinuousInput(-180, 180);      
     this.translationPid = new PIDController(0.0, 0.0, 0.0);
     
     // Use addRequirements() here to declare subsystem dependencies.
   }
+ 
+  public double GetTargetDistance()
+  {
+    return this.targetDistance;
+  } 
 
   // Called when the command is initially scheduled.
   @Override
@@ -77,24 +85,24 @@ public class AutoDriveLinear extends CommandBase {
     currentRightDistance = initialRightDistance;
     initialHeading = gyro.getHeading();
     currentHeading = initialHeading;
-    desiredDistance = SmartDashboard.getNumber(KEY, 0.0);
+    //desiredDistance = SmartDashboard.getNumber(KEY, 0.0);         // if planning on using smartdashboard would use this, but not needed since we are passing in the value through the constructor. 
     drive.setAutonomousRunning(true);
     drive.setThrottle(0, 0); // Clear out any current throttle on the drive....
-    rotationPid.setP(SmartDashboard.getNumber("linRotP", 0.0));
+    rotationPid.setP(SmartDashboard.getNumber("linRotP", 0.005));
     rotationPid.setI(SmartDashboard.getNumber("linRotI", 0.0));
     rotationPid.setD(SmartDashboard.getNumber("linRotD", 0.0));
     rotationPid.setTolerance(SmartDashboard.getNumber("linRotTol", 1.0));
     rotationPid.setSetpoint(0.0);
-    translationPid.setP(SmartDashboard.getNumber("linTransP", 0.0));
+    translationPid.setP(SmartDashboard.getNumber("linTransP", 0.005));
     translationPid.setI(SmartDashboard.getNumber("linTransI", 0.0));
     translationPid.setD(SmartDashboard.getNumber("linTransD", 0.0));
-    translationPid.setSetpoint(desiredDistance);
+    translationPid.setSetpoint(targetDistance);
     translationPid.setTolerance(SmartDashboard.getNumber("linTransTolerance", 1.0));
     odometry = new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
-    logger.info("Going the distance: "+desiredDistance);
+    logger.info("Going the distance: "+ targetDistance);
   }
 
-  private double getDistanceLeft() {
+  private double getDistanceLeft() { 
     return currentLeftDistance - initialLeftDistance;
   }
 
@@ -105,7 +113,10 @@ public class AutoDriveLinear extends CommandBase {
   private Rotation2d getGyroHeading() {
     return Rotation2d.fromDegrees(currentHeading - initialHeading);
   }
-
+  
+  public double GetInitialRightDistance() {   /////////////////////////////////
+    return initialRightDistance;
+  }
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
@@ -116,11 +127,27 @@ public class AutoDriveLinear extends CommandBase {
     Rotation2d rotation = pose.getRotation();
     Translation2d translation = pose.getTranslation();
     double rotationOutput = rotationPid.calculate(rotation.getDegrees());
-    double translationOutput = translationPid.calculate(translation.getNorm());
+    double translationOutput = translationPid.calculate(translation.getNorm()); //
+    this.lastRotationOutput = rotationOutput;
+    this.lastDriveOutput = translationOutput;
 
     drive.arcadeDrive(translationOutput, rotationOutput);
   }
 
+  public double GetLastRotationValue() { //use this function so were able to recive (and output to testing)the numbers and calculations the robot will be moving
+    return lastRotationOutput;
+  }
+  
+  public double GetLastDriveValue() { 
+    return lastDriveOutput;
+  }
+  
+  public double GetCurrentRightDistance() {   // this is added so we are able to test to see how far the robot has driven, in our UT_AutoDriveLinear Program
+    return currentRightDistance;
+  }
+  public double GetCurrentLeftDistance() {  
+    return currentLeftDistance;
+  }
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {

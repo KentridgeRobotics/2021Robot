@@ -14,7 +14,6 @@ import static org.testng.Assert.assertNotEquals;
 import com.chargerrobotics.commands.autonomous.AutoTurnStationary;
 import com.chargerrobotics.sensors.GyroscopeSerial;
 import com.chargerrobotics.subsystems.DriveSubsystem;
-import com.chargerrobotics.utils.SmartDashboardHelper;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -28,7 +27,6 @@ public class UT_AutoTurnStationary {
     // functionality without having a real drive or gyro component
     private  DriveSubsystem driveMock;
     private  GyroscopeSerial gyroMock; 
-    private  SmartDashboardHelper smartDashboardMock;
 
 
     @BeforeClass
@@ -37,7 +35,6 @@ public class UT_AutoTurnStationary {
       // Init unit under test
       driveMock = mock(com.chargerrobotics.subsystems.DriveSubsystem.class);
       gyroMock = mock(com.chargerrobotics.sensors.GyroscopeSerial.class);
-      smartDashboardMock = mock (com.chargerrobotics.utils.SmartDashboardHelper.class);
 
     }
     
@@ -47,10 +44,9 @@ public class UT_AutoTurnStationary {
     // Reset mock to ensure valid data
     reset(gyroMock);
     reset(driveMock);
-    reset(smartDashboardMock);
     //when (smartDashboardMock.getNumber("StationaryRotation", 90.0)).thenReturn(90.0);
 
-    AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
+    AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, 90);
     testCommand.initialize();
     testCommand.execute();
 
@@ -90,9 +86,8 @@ public class UT_AutoTurnStationary {
   
   reset(gyroMock);
   reset(driveMock);
-  reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 0);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, 0);
     testCommand.initialize();
     when (gyroMock.getHeading()).thenReturn(0.0f);
     testCommand.execute();
@@ -107,9 +102,8 @@ public class UT_AutoTurnStationary {
   
   reset(gyroMock);
   reset(driveMock);
-  reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), -90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, -90);
     testCommand.initialize();
     testCommand.execute();
 
@@ -123,9 +117,8 @@ public class UT_AutoTurnStationary {
   
   reset(gyroMock);
   reset(driveMock);
-  reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, 90);
     testCommand.initialize();
     testCommand.execute();
 
@@ -139,9 +132,8 @@ public class UT_AutoTurnStationary {
   
   reset(gyroMock);
   reset(driveMock);
-  reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, 90);
     testCommand.initialize();    
     when (gyroMock.getHeading()).thenReturn(89.0f);
     testCommand.execute();
@@ -156,9 +148,8 @@ public class UT_AutoTurnStationary {
   
   reset(gyroMock);
   reset(driveMock);
-  reset(smartDashboardMock);
   
-  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, new SmartDashboardHelper(), 90);
+  AutoTurnStationary testCommand = new AutoTurnStationary(driveMock, gyroMock, 90);
     testCommand.initialize();    
     when (gyroMock.getHeading()).thenReturn(91.0f);
     testCommand.execute();
