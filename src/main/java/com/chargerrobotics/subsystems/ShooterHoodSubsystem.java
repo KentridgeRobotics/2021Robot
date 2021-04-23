@@ -60,39 +60,18 @@ public class ShooterHoodSubsystem extends SubsystemBase {
   }
 
   public double getDesiredAngle() {
-    // Get the limelight subsystem
-    // LimelightSubsystem limelight = LimelightSubsystem.getInstance();
     // The distance (inches) reported from the limelight
     double d = SmartDashboard.getNumber("LimelightDistance", 0);
     // Determine the height to the target
     double h = Constants.targetHeight - Constants.cameraHeight;
     // Calculate the angle given height
-    double theta = Math.atan(h / d); // Math.atan(2 * h / d);
+    double theta = Math.atan(h / d); // was Math.atan(2 * h / d);
     // Return angle in degrees
     return MathUtil.clamp((80 - Math.toDegrees(theta)), 30, 74);
   }
 
-  /*public double getDesiredAngleByZone() {
-    // Get the distance (inches) from the limelight
-    double d = SmartDashboard.getNumber("LimelightDistance", 0);
-
-    // We still need to test the best angles for each zone
-
-    // green zone -- 0 to 90 inches
-    if (d >= 0 && d < 90) return 45.0;
-    // yellow zone
-    if (d >= 90 && d < 150) return 0.0;
-    // blue zone
-    if (d >= 150 && d < 210) return 0.0;
-    // red zone
-    if (d >= 210 && d < 270) return 0.0;
-
-    return 0.0;
-  }*/
-
   public boolean isLimitSwitchTriggered() {
     return shooterHood.getSensorCollection().isFwdLimitSwitchClosed();
-    // return !shooterLimitSwitch.get();
   }
 
   public double getHoodPosition() {

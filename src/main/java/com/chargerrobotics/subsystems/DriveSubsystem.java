@@ -32,6 +32,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   private double leftThrottle;
   private double rightThrottle;
+  private double arcadeThrottle;
+  private double arcadeTurnRate;
 
   private boolean brake;
   private boolean boost;
@@ -94,8 +96,13 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void setThrottle(double left, double right) {
-    leftThrottle = left;
-    rightThrottle = right;
+    if (inTankDrive) {
+      leftThrottle = left;
+      rightThrottle = right;
+    } else {
+      arcadeThrottle = right; // This is intentional
+      arcadeTurnRate = left; // This is also intentional
+    }
   }
 
   public void setBrake(boolean brake) {
@@ -202,13 +209,18 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     super.periodic();
-    heading = table.getEntry("euler_roll").getDouble(-1);
+    heading =
+        table
+            .getEntry("euler_roll")
+            .getDouble(
+                -1); // -1 is an invalid value because the BNO055 returns the heading from 0 - 359
+    // degrees
     SmartDashboard.putNumber("heading", heading);
     if (!autonomousRunning) {
-      if(inTankDrive) {
+      if (inTankDrive) {
         tankDrive(leftThrottle, rightThrottle);
       } else {
-        arcadeDrive(rightThrottle, leftThrottle); // Same issue as the simulation
+        arcadeDrive(arcadeThrottle, arcadeTurnRate);
       }
     }
   }

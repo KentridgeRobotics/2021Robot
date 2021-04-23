@@ -2,7 +2,6 @@ package com.chargerrobotics.commands.drive;
 
 import com.chargerrobotics.subsystems.DriveSubsystem;
 import com.chargerrobotics.utils.XboxController;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class ManualDriveCommand extends CommandBase {
@@ -20,7 +19,7 @@ public class ManualDriveCommand extends CommandBase {
 
   @Override
   public void execute() {
-    if(driveSubsystem.getInTankDrive()) {
+    if (driveSubsystem.getInTankDrive()) {
       driveSubsystem.setThrottle(primary.getLeftStickY(), -primary.getRightStickY());
     } else {
       driveSubsystem.setThrottle(primary.getLeftStickY(), -primary.getRightStickX());

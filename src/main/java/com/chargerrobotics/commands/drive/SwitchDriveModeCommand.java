@@ -5,7 +5,6 @@
 package com.chargerrobotics.commands.drive;
 
 import com.chargerrobotics.subsystems.DriveSubsystem;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class SwitchDriveModeCommand extends CommandBase {

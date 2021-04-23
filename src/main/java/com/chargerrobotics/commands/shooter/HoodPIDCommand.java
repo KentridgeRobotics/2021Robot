@@ -10,13 +10,11 @@ package com.chargerrobotics.commands.shooter;
 import com.chargerrobotics.Constants;
 import com.chargerrobotics.subsystems.ShooterHoodSubsystem;
 import com.chargerrobotics.utils.NetworkMapping;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -27,25 +25,39 @@ public class HoodPIDCommand extends PIDCommand {
   private static PIDController pid;
   private static double setPoint;
 
-  public static final NetworkMapping<Double> kP = new NetworkMapping<Double>("hood_p", Constants.hoodP, val -> { 
-    setPIDP(val);
-  });
+  public static final NetworkMapping<Double> kP =
+      new NetworkMapping<Double>(
+          "hood_p",
+          Constants.hoodP,
+          val -> {
+            setPIDP(val);
+          });
 
-  public static final NetworkMapping<Double> kI = new NetworkMapping<Double>("hood_i", Constants.hoodI, val -> { 
-    setPIDI(val);
-  });
+  public static final NetworkMapping<Double> kI =
+      new NetworkMapping<Double>(
+          "hood_i",
+          Constants.hoodI,
+          val -> {
+            setPIDI(val);
+          });
 
-  public static final NetworkMapping<Double> kD = new NetworkMapping<Double>("hood_d", Constants.hoodD, val -> {
-    setPIDD(val);
-  });
+  public static final NetworkMapping<Double> kD =
+      new NetworkMapping<Double>(
+          "hood_d",
+          Constants.hoodD,
+          val -> {
+            setPIDD(val);
+          });
 
-  public static final NetworkMapping<Double> hood_setPoint = new NetworkMapping<Double>("hood_SetPointDegrees", 45.0, val -> {
-    setPoint = val;
-  });
+  public static final NetworkMapping<Double> hood_setPoint =
+      new NetworkMapping<Double>(
+          "hood_SetPointDegrees",
+          45.0, // 45.0 is just for testing purposes
+          val -> {
+            setPoint = val;
+          });
 
-  /**
-   * Creates a new HoodPIDCommand.
-   */
+  /** Creates a new HoodPIDCommand. */
   public HoodPIDCommand(ShooterHoodSubsystem shooterHoodSubsystem) {
     super(
         // The controller that the command will use
@@ -70,7 +82,7 @@ public class HoodPIDCommand extends PIDCommand {
   }
 
   private static PIDController setPID(PIDController pid) {
-     HoodPIDCommand.pid = pid;
+    HoodPIDCommand.pid = pid;
     return pid;
   }
 
@@ -99,7 +111,6 @@ public class HoodPIDCommand extends PIDCommand {
   public void execute() {
     super.execute();
     SmartDashboard.putNumber("hoodError", getController().getPositionError());
-    //SmartDashboard.putNumber("hoodSetpointTicks", setPoint);
     SmartDashboard.putNumber("hoodControllerSetpointTicks", getController().getSetpoint());
     SmartDashboard.putNumber("CurrentHoodPosition", shooterHoodSubsystem.getHoodPosition());
     SmartDashboard.putNumber("ControllerP", getController().getP());
