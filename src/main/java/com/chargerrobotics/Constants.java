@@ -74,8 +74,8 @@ public final class Constants {
   public static final int hoodGainSlot = 0;
   public static final int hoodTimeOutMs = 30;
   public static final int ticksPerRev = 0;
-  public static final double hoodP = 0.0007;
-  public static final double hoodI = 0.00038;
+  public static final double hoodP = 0.00033;
+  public static final double hoodI = 0.0003;
   public static final double hoodD = 0.0;
   public static final double hoodF = 0.0;
 
@@ -89,7 +89,12 @@ public final class Constants {
 
   // Limelight distance calculation constants
 
-  // Placeholder X and Y coords of markers on field in inches, given initiation line is marked south
+  // Limelight target alignment constants
+  public static final double ALIGNMENT_P = 0.015;
+  public static final double ALIGNMENT_I = 0.0;
+  public static final double ALIGNMENT_D = 0.0005;
+  // Placeholder X and Y coords of markers on field in inches, given initiation line is marked
+  // south
   // and the bottom left corner is (0, 0):
   public static final double MARKER_ONE_X = 0;
   public static final double MARKER_ONE_Y = 0;

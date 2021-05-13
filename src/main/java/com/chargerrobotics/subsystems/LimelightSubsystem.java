@@ -24,6 +24,7 @@ public class LimelightSubsystem extends SubsystemBase {
   private static LimelightSubsystem instance;
 
   private double x, y, v, s, p;
+  private double lastDistance = 0;
 
   public LimelightSubsystem() {
     table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -224,8 +225,10 @@ public class LimelightSubsystem extends SubsystemBase {
        * another, check the angle of the LimeLight camera. If it gets bumped and the angle changes
        * then everything will be off. That is really the main variable that can get bumped.
        */
-      return ((Constants.targetHeight - Constants.cameraHeight)
-          / Math.tan(Math.toRadians(Constants.cameraAngle + y)));
+      lastDistance =
+          ((Constants.targetHeight - Constants.cameraHeight)
+              / Math.tan(Math.toRadians(Constants.cameraAngle + y)));
+      return lastDistance;
     }
   }
 
@@ -250,27 +253,27 @@ public class LimelightSubsystem extends SubsystemBase {
     if (dist != null) {
       SmartDashboard.putNumber("LimelightDistance", dist);
     } else {
-      SmartDashboard.putNumber("Distance to shooter target cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightDistance", lastDistance);
     }
     if (distM != null) {
       SmartDashboard.putNumber("LimelightDistanceM", distM);
     } else {
-      SmartDashboard.putNumber("Distance to a marker cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightDistanceM", -99999.99);
     }
     if (deg != null) {
       SmartDashboard.putNumber("LimelightCardinal", deg);
     } else {
-      SmartDashboard.putNumber("Cardinal rotation cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightCardinal", -99999.99);
     }
     if (lx != null) {
       SmartDashboard.putNumber("LimelightxCoord", lx);
     } else {
-      SmartDashboard.putNumber("Coordinates cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightxCoord", -99999.99);
     }
     if (ly != null) {
       SmartDashboard.putNumber("LimelightyCoord", ly);
     } else {
-      SmartDashboard.putNumber("Coordinates cannot be found.", -99999.99);
+      SmartDashboard.putNumber("LimelightyCoord", -99999.99);
     }
   }
 }

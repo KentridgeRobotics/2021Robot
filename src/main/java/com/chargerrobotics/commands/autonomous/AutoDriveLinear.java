@@ -7,12 +7,7 @@
 
 package com.chargerrobotics.commands.autonomous;
 
-import com.chargerrobotics.sensors.GyroscopeSerial;
 import com.chargerrobotics.subsystems.DriveSubsystem;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -20,6 +15,8 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AutoDriveLinear extends CommandBase {
   private static final Logger logger = LoggerFactory.getLogger(AutoDriveLinear.class);
@@ -31,7 +28,6 @@ public class AutoDriveLinear extends CommandBase {
   private double initialHeading;
   private double desiredDistance;
   private final DriveSubsystem drive;
-  private final GyroscopeSerial gyro;
   private DifferentialDriveOdometry odometry;
   private static final String KEY = "LinearAutoDistance";
   private PIDController rotationPid;
@@ -44,17 +40,14 @@ public class AutoDriveLinear extends CommandBase {
   private double linTransI = SmartDashboard.getNumber("linTransI", 0.0);
   private double linTransD = SmartDashboard.getNumber("linTransD", 0.0);
   private double linTransTolerance = SmartDashboard.getNumber("linTransTolerance", 0.0);
-  /**
-   * Creates a new AutoDriveLinear.
-   */
-  public AutoDriveLinear(DriveSubsystem drive, GyroscopeSerial gyro) {
+  /** Creates a new AutoDriveLinear. */
+  public AutoDriveLinear(DriveSubsystem drive) {
     this.drive = drive;
-    this.gyro = gyro;
     addRequirements(drive);
     SmartDashboard.putNumber(KEY, 0.0);
     SmartDashboard.putNumber("linRotP", linRotP);
-    SmartDashboard.putNumber("linRotI", linRotI); 
-    SmartDashboard.putNumber("linRotD",linRotD);
+    SmartDashboard.putNumber("linRotI", linRotI);
+    SmartDashboard.putNumber("linRotD", linRotD);
     SmartDashboard.putNumber("linRotTolerance", linRotTolerance);
     SmartDashboard.putNumber("linTransP", linTransP);
     SmartDashboard.putNumber("linTransI", linTransI);
@@ -63,7 +56,7 @@ public class AutoDriveLinear extends CommandBase {
     this.rotationPid = new PIDController(0.0, 0.0, 0.0);
     this.rotationPid.enableContinuousInput(0.0, 360.0);
     this.translationPid = new PIDController(0.0, 0.0, 0.0);
-    
+
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -75,7 +68,7 @@ public class AutoDriveLinear extends CommandBase {
     initialRightDistance = drive.getOdoRight();
     currentLeftDistance = initialLeftDistance;
     currentRightDistance = initialRightDistance;
-    initialHeading = gyro.getHeading();
+    initialHeading = drive.getRobotHeading();
     currentHeading = initialHeading;
     desiredDistance = SmartDashboard.getNumber(KEY, 0.0);
     drive.setAutonomousRunning(true);
@@ -90,8 +83,9 @@ public class AutoDriveLinear extends CommandBase {
     translationPid.setD(SmartDashboard.getNumber("linTransD", 0.0));
     translationPid.setSetpoint(desiredDistance);
     translationPid.setTolerance(SmartDashboard.getNumber("linTransTolerance", 1.0));
-    odometry = new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
-    logger.info("Going the distance: "+desiredDistance);
+    odometry =
+        new DifferentialDriveOdometry(getGyroHeading(), new Pose2d(0.0, 0.0, new Rotation2d(0.0)));
+    logger.info("Going the distance: " + desiredDistance);
   }
 
   private double getDistanceLeft() {
@@ -111,7 +105,7 @@ public class AutoDriveLinear extends CommandBase {
   public void execute() {
     currentLeftDistance = drive.getOdoLeft();
     currentRightDistance = drive.getOdoRight();
-    currentHeading = gyro.getHeading();
+    currentHeading = drive.getRobotHeading();
     Pose2d pose = odometry.update(getGyroHeading(), getDistanceLeft(), getDistanceRight());
     Rotation2d rotation = pose.getRotation();
     Translation2d translation = pose.getTranslation();

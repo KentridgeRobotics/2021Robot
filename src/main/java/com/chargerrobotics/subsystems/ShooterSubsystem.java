@@ -1,7 +1,6 @@
 package com.chargerrobotics.subsystems;
 
 import com.chargerrobotics.Constants;
-import com.chargerrobotics.utils.NetworkMapping;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -10,6 +9,7 @@ import com.revrobotics.ControlType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpiutil.math.MathUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -35,7 +35,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private CANPIDController shooterPIDController1;
   private CANPIDController shooterPIDController2;
   public double kIz, kMaxOutput, kMinOutput, maxRPM;
-  public final NetworkMapping<Double> kP =
+  /*public final NetworkMapping<Double> kP =
       new NetworkMapping<Double>(
           "shooter_p",
           Constants.shooterP,
@@ -69,7 +69,7 @@ public class ShooterSubsystem extends SubsystemBase {
           Constants.shooterTargetRPM,
           val -> {
             setSetPoint(val);
-          });
+          });*/
   private boolean isRunning;
 
   public static ShooterSubsystem getInstance() {
@@ -93,10 +93,10 @@ public class ShooterSubsystem extends SubsystemBase {
     shooter2.setIdleMode(IdleMode.kCoast);
     shooterPIDController1.setOutputRange(Constants.shooterMinOutput, Constants.shooterMaxOutput);
     shooterPIDController2.setOutputRange(Constants.shooterMinOutput, Constants.shooterMaxOutput);
-    setPIDP(kP.getValue());
-    setPIDI(kI.getValue());
-    setPIDD(kD.getValue());
-    setPIDF(kF.getValue());
+    setPIDP(Constants.shooterP);
+    setPIDI(Constants.shooterI);
+    setPIDD(Constants.shooterD);
+    setPIDF(Constants.shooterFeedForward);
     setRunning(false);
   }
 
@@ -132,7 +132,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setRunning(boolean isRunning) {
     this.isRunning = isRunning;
     if (isRunning) {
-      setPIDTarget(kSetPoint.getValue());
+      setSetPoint(calculateRPM(desiredVelocity()));
     } else {
       shooter1.set(0.0);
       shooter2.set(0.0);
@@ -155,8 +155,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // height and distance will be replaced with values of distance and height passed in from
     // limelight
-    double height = 74.5 * 0.0254;
-    double distance = 120 * 0.0254;
+    double height = (Constants.targetHeight - Constants.cameraHeight) * 0.0254;
+    double distance = SmartDashboard.getNumber("LimelightDistance", 0) * 0.0254;
     double gravity = 9.8;
 
     double speed =
@@ -165,18 +165,20 @@ public class ShooterSubsystem extends SubsystemBase {
     return speed;
   }
 
-  public void calculateRPM(double speed) {
+  public double calculateRPM(double speed) {
     // original equation was y = 0.004245x - 1.711
     // y is speed (velocity) and x is rpm
     double rpm = (speed + 1.711) / 0.004245;
 
-    setSetPoint(rpm);
+    return MathUtil.clamp(rpm + 1000, 0, 5676);
   }
 
   @Override
   public void periodic() {
     super.periodic();
-    SmartDashboard.putNumber("ShooterSpeed", getAverageVelocity());
+    SmartDashboard.putNumber("DesiredVelocity", desiredVelocity());
+    SmartDashboard.putNumber("DesiredRPM", calculateRPM(desiredVelocity()));
+    SmartDashboard.putNumber("ShooterSpeed", Math.abs(getAverageVelocity()));
     SmartDashboard.putNumber("shooterSpeed1", shooter1.getEncoder().getVelocity());
     SmartDashboard.putNumber("shooterSpeed2", shooter2.getEncoder().getVelocity());
     SmartDashboard.putNumber("motor1temp", shooter1.getMotorTemperature());
